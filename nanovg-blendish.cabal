@@ -1,0 +1,68 @@
+name:                nanovg-blendish
+version:             0.1.0.0
+synopsis:            Haskell oui-blendish reimplementation using nanovg bindings
+-- description:         Something a bit longer
+homepage:            https://github.com/sorki/nanovg-blendish
+license:             BSD3
+license-file:        LICENSE
+author:              Richard Marko
+maintainer:          srk@48.io
+copyright:           2020 Richard Marko
+category:            Web
+build-type:          Simple
+cabal-version:       >=1.10
+
+extra-source-files:
+    CHANGELOG.md
+    LICENSE
+    README.md
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Graphics.NanoVG.Blendish
+                     , Graphics.NanoVG.Blendish.Context
+                     , Graphics.NanoVG.Blendish.Icon
+                     , Graphics.NanoVG.Blendish.Shorthand
+                     , Graphics.NanoVG.Blendish.Theme
+                     , Graphics.NanoVG.Blendish.Types
+                     , Graphics.NanoVG.Blendish.Utils
+  build-depends:       base >= 4.7 && < 5
+                     , bytestring
+                     , text
+                     , GLFW-b
+                     , reactive-banana
+                     , stm
+                     , transformers
+                     , nanovg
+                     , nanovg-simple
+                     --, xx TMP
+                     , ghcid
+                     , containers
+                     , vector
+  default-language:    Haskell2010
+  ghc-options:         -Wall -Wunused-packages
+
+executable nanovg-blendish-exe
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , bytestring
+                     , nanovg-blendish
+  default-language:    Haskell2010
+
+-- test-suite nanovg-blendish-tests
+--   type:                exitcode-stdio-1.0
+--   hs-source-dirs:      test
+--   main-is:             Spec.hs
+--   other-modules:       --ParseSpec
+--                        SpecHelper
+--   build-depends:       base >= 4.7 && < 5
+--                      , nanovg-blendish
+--                      , hspec
+--                      , base16-bytestring
+--   default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/sorki/nanovg-blendish

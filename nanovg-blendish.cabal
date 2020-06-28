@@ -33,6 +33,9 @@ library
                      , reactive-banana
                      , stm
                      , transformers
+                     , gl
+                     , GPipe
+                     , GPipe-GLFW
                      , nanovg
                      , nanovg-simple
                      --, xx TMP

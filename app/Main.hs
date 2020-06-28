@@ -1,3 +1,4 @@
 module Main where
 
-main = putStrLn "Hello World"
+import qualified Graphics.NanoVG.Blendish
+main =  Graphics.NanoVG.Blendish.main

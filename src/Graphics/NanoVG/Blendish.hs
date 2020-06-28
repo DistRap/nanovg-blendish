@@ -5,9 +5,10 @@
 
 module Graphics.NanoVG.Blendish where
 
-import "GLFW-b" Graphics.UI.GLFW as GLFW hiding (Image)
-import qualified Data.Map as M
-import qualified Data.Vector as V
+import Graphics.UI.GLFW (WindowHint(..), OpenGLProfile(..), Key(..), MouseButton(..))
+import qualified Graphics.UI.GLFW as GLFW
+--import qualified Data.Map as M
+--import qualified Data.Vector as V
 
 --import LambdaCube.GL as LC -- renderer
 --import LambdaCube.GL.Mesh as LC
@@ -60,6 +61,11 @@ import Graphics.NanoVG.Blendish.Types
 import Graphics.NanoVG.Blendish.Theme
 import Graphics.NanoVG.Blendish.Utils
 
+-- new
+import Graphics.GL.Core33 hiding (Render)
+--import Graphics.GL.Types
+import Graphics.GPipe
+
 foreign import ccall unsafe "initGlew"
   glewInit :: IO CInt
 
@@ -87,8 +93,6 @@ textWidthF label = do
   return (b2 - b0)
 
 
-
-
 labelHeight mIconId label width' = do
   let h = bndWidgetHeight
       width = width' - (bndTextRadius * 2) - (maybe bndIconSheetRes id mIconId)
@@ -106,39 +110,13 @@ labelHeight mIconId label width' = do
 --}
 
 {--
+--}
 --main :: IO ()
 main = do
-    Just pipelineDesc <- decodeStrict <$> SB.readFile "tutorial.json"
-
-
-    win <- initWindow "LambdaCube 3D DSL Hello World" 640 640
-
-    -- setup render data
-    let inputSchema = makeSchema $ do
-          defObjectArray "objects" Triangles $ do
-            "position"  @: Attribute_V3F
-            "uv"        @: Attribute_V2F
-          defUniforms $ do
-            "time"           @: Float
-            "diffuseTexture" @: FTexture2D
-            "model"          @: M44F
-            "cam"            @: M44F
-            "proj"           @: M44F
-
-    storage <- LC.allocStorage inputSchema
-
-    -- upload geometry to GPU and add to pipeline input
-    m <- LC.uploadMeshToGPU cubeMesh
-    LC.addMeshToObjectArray storage "objects" [] m
-    --LC.uploadMeshToGPU triangleB >>= LC.addMeshToObjectArray storage "objects" []
-
     -- load image and upload texture
-    Right img <- Juicy.readImage "logo.png"
-    textureData <- LC.uploadTexture2DToGPU img
-
-    -- allocate GL pipeline
-    renderer <- LC.allocRenderer pipelineDesc
-
+    --Right img <- Juicy.readImage "logo.png"
+    --
+    win <- initWindow "nanovg-blendish" 1920 1080
     c@(NanoVG.Context _c') <- NanoVG.createGL3 (S.fromList [Antialias,StencilStrokes,Debug])
     --fbo' <- alloca (\ptr -> glGenFramebuffers 1 ptr >> peek ptr)
 
@@ -147,15 +125,13 @@ main = do
       Nothing -> error "Unable to load data"
       Just x -> return x
 
-    --GLFW.setMouseButtonCallback win . pure $
 
-    LC.setStorage renderer storage >>= \case -- check schema compatibility
-      Just err -> putStrLn err
-      Nothing  -> loop
-        where loop = do
+    --GLFW.setMouseButtonCallback win . pure $
+    --
+
+    let loop = do
                 -- update graphics input
                 (w,h) <- GLFW.getWindowSize win >>= \(w,h) -> do
-                  LC.setScreenSize storage (fromIntegral w) (fromIntegral h)
                   return (w, h)
 
                 Just t <- GLFW.getTime
@@ -163,17 +139,8 @@ main = do
                 (fbW, fbH) <- GLFW.getFramebufferSize win
                 let pxRatio = fromIntegral fbW / fromIntegral w
 
-                LC.updateUniforms storage $ do
-                  "diffuseTexture" @= return textureData
-                  "time" @= return (realToFrac t :: Float)
-                  --"model" @= return (identity)
-                  "model" @= return (convLC $ quatMatrix $ L.axisAngle (L.normalize $ L.V3 1 1 3) 0)
-                  "cam"   @= return (cameraMatrix 0)
-                  "proj"  @= return (projMatrix (fromIntegral w/ fromIntegral h))
-
-                -- LC
-                glViewport 0 0 (fromIntegral fbW) (fromIntegral fbH)
-                LC.renderFrame renderer
+                --glViewport 0 0 (fromIntegral fbW) (fromIntegral fbH)
+                -- 3d
 
                 -- NANO
                 glViewport 0 0 (fromIntegral fbW) (fromIntegral fbH)
@@ -182,11 +149,11 @@ main = do
                 --glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
                 --glClear (GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
                 --beginFrame c (fromIntegral w) (fromIntegral h) pxRatio
-                glClear (GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
+                --glClear (GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
 
                 --print (pxRatio, w, h, fbW, fbH, mx, my)
                 --NanoVG.beginFrame c (fromIntegral w `div` 2) (fromIntegral h `div` 2) (pxRatio * 2.9)
-                mb1 <- GLFW.getMouseButton win MouseButton'1 
+                mb1 <- GLFW.getMouseButton win MouseButton'1
                 let mb = case mb1 of
                             GLFW.MouseButtonState'Pressed -> [ MouseButton'1 ]
                             _ -> []
@@ -202,18 +169,15 @@ main = do
                 GLFW.swapBuffers win
                 GLFW.pollEvents
 
-                let keyIsPressed k = fmap (==KeyState'Pressed) $ GLFW.getKey win k
-                escape <- keyIsPressed Key'Escape
+                let keyIsPressed k = fmap (==GLFW.KeyState'Pressed) $ GLFW.getKey win k
+                escape <- keyIsPressed GLFW.Key'Escape
                 q <- keyIsPressed Key'Q
                 shouldClose <- GLFW.windowShouldClose win
                 if (escape || q || shouldClose) then return () else loop
 
-    LC.disposeRenderer renderer
-    LC.disposeStorage storage
     GLFW.destroyWindow win
     GLFW.terminate
 
---}
 
 data NData = NData Font NanoVG.Image
 
@@ -871,7 +835,7 @@ cubeMesh = Mesh
   u3 = LC.V2 0 1
 --}
 
-initWindow :: String -> Int -> Int -> IO Window
+initWindow :: String -> Int -> Int -> IO GLFW.Window
 initWindow title width height = do
     GLFW.init
 
@@ -891,11 +855,13 @@ initWindow title width height = do
     -- not needed
     --glEnable GL_MULTISAMPLE
 
-    Just win <- GLFW.createWindow width height title Nothing Nothing
-    GLFW.makeContextCurrent $ Just win
-    glewInit
-
-    return win
+    mWin <- GLFW.createWindow width height title Nothing Nothing
+    case mWin of
+      Nothing -> error "Can't createWindow"
+      Just win -> do
+        GLFW.makeContextCurrent $ Just win
+        glewInit
+        return win
 
 {--
 data Widget wt = Widget {
@@ -912,14 +878,3 @@ render :: Widget Radio -> IO
 --  renderType = Radio
 
 --}
-
-class Render a where
-  render :: a -> Elem
-  --type Renderable a :: * -> *
-
-instance Render () where
-  render x = Button (defA x)
-
-instance Render Bool where
-  render b = Radio (defA b)
-  --type Renderable Bool = Elem

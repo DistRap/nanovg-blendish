@@ -37,10 +37,10 @@ import Graphics.NanoVG.Blendish.Icon
 --import Graphics.NanoVG.Blendish.IconModuleGenerator
 import Graphics.NanoVG.Blendish.Context
 import Graphics.NanoVG.Blendish.Monad
-import Graphics.NanoVG.Blendish.Shorthand
+--import Graphics.NanoVG.Blendish.Shorthand
 import Graphics.NanoVG.Blendish.Types
 import Graphics.NanoVG.Blendish.Theme
-import Graphics.NanoVG.Blendish.Utils
+--import Graphics.NanoVG.Blendish.Utils
 import Paths_nanovg_blendish
 
 import Graphics.GL.Core33
@@ -141,25 +141,13 @@ renderUI ctx (UIData _ icons) x y mb = do
   NanoVG.fontSize ctx 148
   NanoVG.fontFace ctx "sans"
 
-  NanoVG.globalAlpha ctx 0.9
+  NanoVG.globalAlpha ctx 0.5
 
   _w <- flip runReaderT (UIContext ctx (defTheme icons) (x, y)) $ do
-    withFillColor (rgba 0 0 0 100) $ withCtx $ \c ->
-      NanoVG.text c 20 250 "Lambdacube nanovg !!"
-
-    dropShadow (V2 10 10) (V2 100 100) 10 10 10
-    withFillColor gray $ roundBox (V2 10 10) (V2 100 100) 10 10 10 10
-
-    background (V2 100 10) (V2 100 300) (rgba 255 255 255 32)
-
-    check (V2 100 50) black
-    arrow (V2 100 60) 10 black
-    upDownArrow (V2 50 60) 10 black
-
     let sp = bndWidgetHeight + 5
 
-    Theme{..} <- theme
-    background (V2 0 0) (V2 1024 (100 * sp)) tBg -- (rgbaf 0.9 0.9 0.9 0.9) -- tBg
+    -- Theme{..} <- theme
+    --background (V2 0 0) (V2 1024 (100 * sp)) tBg -- (rgbaf 0.9 0.9 0.9 0.9) -- tBg
     toolButton (V2 100 10) (V2 200 21)
       [] NoFocus (Just Icon'Particles) (Just "Tool button")
 

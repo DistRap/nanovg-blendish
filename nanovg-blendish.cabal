@@ -29,6 +29,9 @@ library
                      , Graphics.NanoVG.Blendish.Icon
                      , Graphics.NanoVG.Blendish.IconModuleGenerator
                      , Graphics.NanoVG.Blendish.Monad
+                     , Graphics.NanoVG.Blendish.Monad.Combinators
+                     , Graphics.NanoVG.Blendish.Monad.Primitives
+                     , Graphics.NanoVG.Blendish.Monad.Wrappers
                      , Graphics.NanoVG.Blendish.Shorthand
                      , Graphics.NanoVG.Blendish.Theme
                      , Graphics.NanoVG.Blendish.Types

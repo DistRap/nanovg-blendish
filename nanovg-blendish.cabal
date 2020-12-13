@@ -7,7 +7,7 @@ license:             BSD3
 license-file:        LICENSE
 author:              Richard Marko
 maintainer:          srk@48.io
-copyright:           2020 Richard Marko
+copyright:           2021 Richard Marko
 category:            Web
 build-type:          Simple
 cabal-version:       >=1.10

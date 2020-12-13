@@ -22,6 +22,8 @@ library
   exposed-modules:     Graphics.NanoVG.Blendish
                      , Graphics.NanoVG.Blendish.Context
                      , Graphics.NanoVG.Blendish.Icon
+                     , Graphics.NanoVG.Blendish.IconModuleGenerator
+                     , Graphics.NanoVG.Blendish.Monad
                      , Graphics.NanoVG.Blendish.Shorthand
                      , Graphics.NanoVG.Blendish.Theme
                      , Graphics.NanoVG.Blendish.Types
@@ -30,20 +32,15 @@ library
                      , bytestring
                      , text
                      , GLFW-b
-                     , reactive-banana
                      , stm
                      , transformers
                      , gl
-                     , GPipe
-                     , GPipe-GLFW
                      , nanovg
-                     , nanovg-simple
-                     --, xx TMP
-                     , ghcid
                      , containers
-                     , vector
+                     , linear
   default-language:    Haskell2010
   ghc-options:         -Wall -Wunused-packages
+  c-sources:           cbits/glew.c
 
 executable nanovg-blendish-exe
   hs-source-dirs:      app

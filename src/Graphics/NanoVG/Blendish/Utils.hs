@@ -5,15 +5,18 @@ import NanoVG (Color(..))
 import Foreign.C.Types (CFloat(..))
 import qualified NanoVG
 
-offsetColor :: Color -> Integer -> Color
-offsetColor (Color r g b a) delta = Color (r + by) (g + by) (b + by) a
+offsetColor :: Color -> Float -> Color
+offsetColor (Color (CFloat r) (CFloat g) (CFloat b) a) delta = Color (CFloat $ r + by) (CFloat $ g + by) (CFloat $ b + by) a
   where
-    by = (fromIntegral delta) / 255
+    by = delta / 255
 
 talpha :: Float
 talpha = 0.666
 
+trans :: Color -> Color
 trans = flip trans' talpha
+
+opaq :: Color -> Color
 opaq = flip setAlpha 0
 
 trans' :: Color -> Float -> Color
@@ -21,5 +24,20 @@ trans' (Color r g b a) factor = Color r g b (a * (CFloat factor))
 
 setAlpha :: Color -> Float -> Color
 setAlpha (Color r g b _a) a = Color r g b (CFloat a)
+
+rgbf :: Float -> Float -> Float -> Color
+rgbf r g b = NanoVG.rgbf (CFloat r) (CFloat g) (CFloat b)
+
+rgba :: Int -> Int -> Int -> Int -> Color
+rgba r g b a = NanoVG.rgba (fromIntegral r) (fromIntegral g) (fromIntegral b) (fromIntegral a)
+
+rgbaf :: Float -> Float -> Float -> Float -> Color
+rgbaf r g b a = NanoVG.rgbaf (CFloat r) (CFloat g) (CFloat b) (CFloat a)
+
+rgbf1 :: Float -> Color
+rgbf1 x = rgbf x x x
+
+rgbaf1 :: Float -> Float -> Color
+rgbaf1 x a = rgbaf x x x a
 
 

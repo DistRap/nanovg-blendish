@@ -1,13 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -fno-warn-unused-record-wildcards #-}
 
 module Graphics.NanoVG.Blendish.Theme where
 
 import Data.Text (Text)
-import NanoVG (Color, Image, rgba, rgbf, rgbaf)
+import NanoVG (Color, Image)
 import Graphics.NanoVG.Blendish.Types (WidgetFocus(..))
 import Graphics.NanoVG.Blendish.Shorthand
 import Graphics.NanoVG.Blendish.Utils
+import Linear
 
 import qualified NanoVG
 
@@ -18,11 +20,11 @@ data WidgetTheme = WidgetTheme {
   , wtInnerSelected :: Color
   , wtText          :: Color -- ^ Text color
   , wtTextSelected  :: Color -- ^ Color of selected text
-  , wtShadeTop      :: Integer -- ^ Delta modifier for upper part of gradient (-100 to 100)
-  , wtShadeDown     :: Integer -- ^ Delta modifier for lower part of gradient (-100 to 100)
-
+  , wtShadeTop      :: Float -- ^ Delta modifier for upper part of gradient (-100 to 100)
+  , wtShadeDown     :: Float -- ^ Delta modifier for lower part of gradient (-100 to 100)
   }
 
+def :: WidgetTheme
 def = WidgetTheme
   (NanoVG.rgbf 0.098 0.098 0.098)
   (NanoVG.rgbf 0.098 0.098 0.098)
@@ -32,36 +34,61 @@ def = WidgetTheme
   bndColorTextSelected
   0 0
 
--- theme
+bndColorText :: Color
 bndColorText =  black
+
+bndColorTextSelected :: Color
 bndColorTextSelected = white
 
+shadeTopDown
+  :: Float
+  -> Float
+  -> WidgetTheme
+  -> WidgetTheme
 shadeTopDown top down x = x { wtShadeTop = top, wtShadeDown = down }
 
+fifteenShades :: WidgetTheme -> WidgetTheme
 fifteenShades = shadeTopDown 15 (-15)
 
+offsetColorTopDown :: Color -> WidgetTheme -> (Color, Color)
 offsetColorTopDown c WidgetTheme{..} =
   (offsetColor c wtShadeTop, offsetColor c wtShadeDown)
 
-shapeColors a b c d x = x {
-    wtOutline = a
+shapeColors
+  :: Color
+  -> Color
+  -> Color
+  -> Color
+  -> WidgetTheme
+  -> WidgetTheme
+shapeColors a b c d x = x
+  { wtOutline = a
   , wtItem = b
   , wtInner = c
-  , wtInnerSelected = d }
+  , wtInnerSelected = d
+  }
 
-textColors a b x = x {
-    wtText = a
+textColors
+  :: Color
+  -> Color
+  -> WidgetTheme
+  -> WidgetTheme
+textColors a b x = x
+  { wtText = a
   , wtTextSelected = b
   }
 
+toolTheme :: WidgetTheme
 toolTheme =  fifteenShades def
 
+radioTheme :: WidgetTheme
 radioTheme = fifteenShades $ shapeColors
   black white
   (rgbf 0.275 0.275 0.275)
   (rgbf 0.337 0.502 0.761)
   def
 
+textFieldTheme :: WidgetTheme
 textFieldTheme = shadeTopDown 0 25 $ shapeColors
   (rgbf 0.098 0.098 0.098)
   (rgbf 0.353 0.353 0.353)
@@ -69,17 +96,20 @@ textFieldTheme = shadeTopDown 0 25 $ shapeColors
   (rgbf 0.6   0.6   0.6  )
   def
 
+optionTheme :: WidgetTheme
 optionTheme = fifteenShades $ shapeColors
   black white
   (rgbf 0.275 0.275 0.275)
   (rgbf 0.275 0.275 0.275)
   def
 
+choiceTheme :: WidgetTheme
 choiceTheme = textColors
   bndColorTextSelected
   (rgbf 0.8   0.8   0.8  )
   optionTheme
 
+numberFieldTheme :: WidgetTheme
 numberFieldTheme = shadeTopDown (-20) 0 $ shapeColors
   (rgbf 0.098 0.098 0.098)
   (rgbf 0.353 0.353 0.353)
@@ -87,8 +117,10 @@ numberFieldTheme = shadeTopDown (-20) 0 $ shapeColors
   (rgbf 0.6   0.6   0.6  )
   def
 
+sliderTheme :: WidgetTheme
 sliderTheme = numberFieldTheme { wtItem = rgbf 0.502 0.502 0.502 }
 
+scrollBarTheme :: WidgetTheme
 scrollBarTheme = shadeTopDown 5 (-5) $ shapeColors
   (rgbf 0.196 0.196 0.196)
   (rgbf 0.502 0.502 0.502)
@@ -96,6 +128,7 @@ scrollBarTheme = shadeTopDown 5 (-5) $ shapeColors
   (rgbaf 0.392 0.392 0.392 0.706)
   def
 
+toolTipTheme :: WidgetTheme
 toolTipTheme = shapeColors
   black
   (rgbf 0.392 0.392 0.392)
@@ -106,11 +139,8 @@ toolTipTheme = shapeColors
   bndColorTextSelected
   def
 
--- lolo
-rgbf1 x = rgbf x x x
-rgbaf1 x a = rgbaf x x x a
-
-menuTheme' = shapeColors
+menuTheme :: WidgetTheme
+menuTheme = shapeColors
   black
   (rgbf1 0.392)
   (rgbaf1 0.098 0.902)
@@ -120,7 +150,8 @@ menuTheme' = shapeColors
   bndColorTextSelected
   def
 
-menuItemTheme' = shadeTopDown 38 0 $ shapeColors
+menuItemTheme :: WidgetTheme
+menuItemTheme = shadeTopDown 38 0 $ shapeColors
   black
   (rgbaf1 0.675 0.502)
   (rgbaf1 0     0    )
@@ -141,7 +172,8 @@ data NodeTheme = NodeTheme {
   , ntNoodleCurving :: Int -- how much a noodle curves (0 to 10)
   }
 
-defNT = NodeTheme
+defaultNodeTheme :: NodeTheme
+defaultNodeTheme = NodeTheme
   (rgbf 0.945 0.345 0    )
   black
   (rgbf 0.498 0.439 0.439)
@@ -170,6 +202,7 @@ data Theme = Theme {
   , tFontSize    :: Int
   }
 
+defTheme :: Image -> Theme
 defTheme iconz = Theme
   (rgbf 0.447 0.447 0.447)
   def
@@ -182,9 +215,9 @@ defTheme iconz = Theme
   sliderTheme
   scrollBarTheme
   toolTipTheme
-  menuTheme'
-  menuItemTheme'
-  defNT
+  menuTheme
+  menuItemTheme
+  defaultNodeTheme
   iconz
   "sans"
   13
@@ -192,8 +225,8 @@ defTheme iconz = Theme
 innerColors :: WidgetFocus -> WidgetTheme -> Bool -> (Color, Color)
 innerColors NoFocus wt@WidgetTheme{..} _ = offsetColorTopDown wtInner wt
 innerColors HasFocus wt@WidgetTheme{..} _ = offsetColorTopDown (offsetColor wtInner bndHoverShade) wt
-innerColors ActiveFocus wt@WidgetTheme{..} flip = 
-  case flip of
+innerColors ActiveFocus wt@WidgetTheme{..} flipped =
+  case flipped of
     False -> offsetColorTopDown wtInnerSelected wt
     True -> offsetColorTopDown wtInnerSelected $ -- flipped top/down
       wt { wtShadeTop = wtShadeDown, wtShadeDown = wtShadeTop }
@@ -207,82 +240,155 @@ nodeWireColor ActiveFocus NodeTheme{..} = ntActiveNode
 nodeWireColor HasFocus    NodeTheme{..} = ntWireSelect
 nodeWireColor NoFocus     NodeTheme{..} = rgbf1 0.5
 
-clamp x low high | x < low = low
-clamp x low high | x > high = high
-clamp x low high | otherwise = x
+clamp :: Ord a => a -> a -> a -> a
+clamp x low _    | x < low = low
+clamp x _   high | x > high = high
+clamp x _   _    | otherwise = x
 
-scrollHandleRect x y w h off' size' =
+scrollHandleRect
+  :: V2 Float
+  -> V2 Float
+  -> Float -- ^ offset
+  -> Float -- ^ size
+  -> V4 Float
+scrollHandleRect (V2 x y) (V2 w h) off' size' =
   let off = clamp off' 0 1
       size = clamp size' 0 1
   in if h > w
-    then 
+    then
       let hs = max (size * h) (w + 1)
-      in (x, y + (h - hs) * off, w, hs)
+      in (V4 x (y + (h - hs) * off) w hs)
     else
       let ws = max (size * w) (h - 1)
-      in (x + (w - ws) * off, y, ws, h)
+      in (V4 (x + (w - ws) * off) y ws h)
 
 
 -- default text size
 --bndLabelFontSize = 15
 
 -- default text padding in inner box
+bndPad :: Integer
 bndPad = 8
+
+bndPadLeft :: Integer
 bndPadLeft = bndPad
+
+bndPadRight :: Integer
 bndPadRight = bndPad
 
+bndLabelSep :: String
 bndLabelSep = ": "
 
+bndTransparentAlpha :: Float
 bndTransparentAlpha = 0.643
 
+bndBevelShade :: Float
 bndBevelShade = 30
+
+bndInsetBevelShade :: Float
 bndInsetBevelShade = 30
+
+bndHoverShade :: Float
 bndHoverShade = 15
+
+bndSplitterShade :: Float
 bndSplitterShade = 100
 
+bndIconSheetWidth :: Integer
 bndIconSheetWidth = 602
+
+bndIconSheetHeight :: Integer
 bndIconSheetHeight = 640
+
+bndIconSheetGrid :: Integer
 bndIconSheetGrid = 21
+
+bndIconSheetXOff :: Integer
 bndIconSheetXOff = 5
+
+bndIconSheetYOff :: Integer
 bndIconSheetYOff = 10
+
+bndIconSheetRes :: Integer
 bndIconSheetRes = 16
 
+bndToolRadius :: Float
 bndToolRadius = 4
 
+bndOptionRadius :: Float
 bndOptionRadius = 4
+
+bndOptionWidth :: Float
 bndOptionWidth = 14
+
+bndOptionHeight :: Float
 bndOptionHeight = 15
 
+bndTextRadius :: Integer
 bndTextRadius = 4
 
+bndNumberRadius :: Float
 bndNumberRadius = 10
 
+bndShadowFeather :: Float
 bndShadowFeather = 12
+
+bndShadowAlpha :: Float
 bndShadowAlpha = 0.5
 
+
+bndScrollBarRadius :: Float
 bndScrollBarRadius = 7
+
+bndScrollBarActiveShade :: Float
 bndScrollBarActiveShade = 16
 
+
+bndMaxGlyphs :: Integer
 bndMaxGlyphs = 1024
+
+bndMaxRows :: Integer
 bndMaxRows = 32
 
+bndTextPadDown :: Float
 bndTextPadDown = 7
 
+
+bndNodeWireOutlineWidth :: Float
 bndNodeWireOutlineWidth = 4
+
+bndNodeWireWidth :: Float
 bndNodeWireWidth = 2
+
+bndNodeRadius :: Float
 bndNodeRadius = 8
+
+bndNodeTitleFeather :: Float
 bndNodeTitleFeather = 1
+
+bndNodeArrowSize :: Float
 bndNodeArrowSize = 9
 
 -- lala
+bndWidgetHeight :: Float
 bndWidgetHeight = 21
+
+bndToolWidth :: Float
 bndToolWidth = 20
 
+
+bndScrollbarWidth :: Float
 bndScrollbarWidth = 13
+
+bndScrollbarHeight :: Float
 bndScrollbarHeight = 14
 
+
+bndVspacing :: Float
 bndVspacing = 1
+
+bndVspacingGroup :: Float
 bndVspacingGroup = 8
+
+bndHspacing :: Float
 bndHspacing = 8
-
-

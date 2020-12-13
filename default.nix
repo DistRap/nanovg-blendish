@@ -1,2 +1,4 @@
 { nixpkgs ? import <nixpkgs> {} }:
-nixpkgs.haskellPackages.callCabal2nix "nanovg-blendish" ./. { }
+nixpkgs.haskell.lib.buildFromSdist (
+  nixpkgs.haskellPackages.callCabal2nix "nanovg-blendish" ./. { }
+)

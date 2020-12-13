@@ -24,7 +24,7 @@ import qualified Data.Text
 
 -- loadDat
 import           Control.Monad
---import           Control.Monad.IO.Class
+import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Reader
 import           Control.Monad.Trans.State
@@ -41,6 +41,7 @@ import Graphics.NanoVG.Blendish.Shorthand
 import Graphics.NanoVG.Blendish.Types
 import Graphics.NanoVG.Blendish.Theme
 import Graphics.NanoVG.Blendish.Utils
+import Paths_nanovg_blendish
 
 import Graphics.GL.Core33
 import Linear
@@ -117,18 +118,20 @@ main = do
     GLFW.terminate
 
 
-data NData = NData Font NanoVG.Image
+data UIData = UIData Font NanoVG.Image
 
 
-loadData :: NanoVG.Context -> MaybeT IO NData
+loadData :: NanoVG.Context -> MaybeT IO UIData
 loadData c = do
-  --normal <- MaybeT $ NanoVG.createFont c "sans" (NanoVG.FileName "Roboto-Regular.ttf")
-  sans <- MaybeT $ NanoVG.createFont c "sans" (NanoVG.FileName "DejaVuSans.ttf")
-  icons <- MaybeT $ NanoVG.createImage c (NanoVG.FileName "blender_icons16.png") 0
-  pure (NData sans icons)
+  (fontFile, iconsFile) <- liftIO $
+    (,) <$> getDataFileName "DejaVuSans.ttf"
+        <*> getDataFileName "blender_icons16.png"
+  sans  <- MaybeT $ NanoVG.createFont c "sans" (NanoVG.FileName $ Data.Text.pack fontFile)
+  icons <- MaybeT $ NanoVG.createImage c (NanoVG.FileName $ Data.Text.pack iconsFile) 0
+  pure (UIData sans icons)
 
-renderUI :: NanoVG.Context -> NData -> Double -> Double -> [MouseButton] -> IO ()
-renderUI ctx (NData _ icons) x y mb = do
+renderUI :: NanoVG.Context -> UIData -> Double -> Double -> [MouseButton] -> IO ()
+renderUI ctx (UIData _ icons) x y mb = do
   --bg <- linearGradient c x y x (y+h) (rgba 0 16 192 0) (rgba 0 160 192 64)
   --NanoVG.beginPath c
   --NanoVG.rect c 10 10 100 300

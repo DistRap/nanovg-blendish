@@ -99,6 +99,9 @@ fontFace = withCtx . flip NanoVG.fontFace
 fontSize :: Float -> Draw ()
 fontSize = withCtx . flip NanoVG.fontSize . cvt
 
+fontBlur :: Float -> Draw ()
+fontBlur = withCtx . flip NanoVG.fontBlur . cvt
+
 text :: V2 Float -> Text -> Draw ()
 text (V2 x y) txt = withCtx $ \c -> NanoVG.text c (cvt x) (cvt y) txt
 

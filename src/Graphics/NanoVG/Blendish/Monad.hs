@@ -11,27 +11,28 @@ import Graphics.NanoVG.Blendish.Utils
 import Graphics.NanoVG.Blendish.Monad.Primitives
 --import Graphics.NanoVG.Blendish.Monad.Wrappers
 
+import NanoVG (Color)
 import Linear (V2(V2))
 -- Themed
 
 toolButton
   :: V2 Float
   -> V2 Float
-  -> [SharpCorner]
+  -> Corners Bool
   -> WidgetFocus
   -> Maybe Icon
-  -> Maybe String
+  -> Maybe Text
   -> Draw ()
-toolButton pos sz flags state mIcon mLabel = do
-  let [cr0, cr1, cr2, cr3] = selectCorners bndToolRadius flags
+toolButton pos sz corners state mIcon mLabel = do
+  let cf = selectCorners bndToolRadius corners
 
   Theme{..} <- theme
 
-  bevelInset pos sz (cr2) (cr3) tBg
+  bevelInset pos sz cf tBg
   let (i1, i2) = innerColors state tTool True
 
-  innerBox   pos sz cr0 cr1 cr2 cr3 i1 i2
-  outlineBox pos sz cr0 cr1 cr2 cr3 (trans (wtOutline tTool))
+  innerBox   pos sz cf i1 i2
+  outlineBox pos sz cf (trans (wtOutline tTool))
 
   let tc = textColor state tTool
   iconLabelValue tIcons pos sz mIcon tc ACenter tFont tFontSize mLabel Nothing
@@ -39,21 +40,21 @@ toolButton pos sz flags state mIcon mLabel = do
 radioButton
   :: V2 Float
   -> V2 Float
-  -> [SharpCorner]
+  -> Corners Bool
   -> WidgetFocus
   -> Maybe Icon
-  -> Maybe String
+  -> Maybe Text
   -> Draw ()
-radioButton pos sz flags state mIcon mLabel = do
-  let [cr0, cr1, cr2, cr3] = selectCorners bndToolRadius flags
+radioButton pos sz corners state mIcon mLabel = do
+  let cf = selectCorners bndToolRadius corners
 
   Theme{..} <- theme
 
-  bevelInset pos sz cr2 cr3 tBg
+  bevelInset pos sz cf tBg
   let (i1, i2) = innerColors state tRadio True
 
-  innerBox   pos sz cr0 cr1 cr2 cr3 i1 i2
-  outlineBox pos sz cr0 cr1 cr2 cr3 (trans (wtOutline tRadio))
+  innerBox   pos sz cf i1 i2
+  outlineBox pos sz cf (trans (wtOutline tRadio))
 
   let tc = textColor state tRadio
   iconLabelValue tIcons pos sz mIcon tc ACenter tFont tFontSize mLabel Nothing
@@ -61,22 +62,22 @@ radioButton pos sz flags state mIcon mLabel = do
 choiceButton
   :: V2 Float
   -> V2 Float
-  -> [SharpCorner]
+  -> Corners Bool
   -> WidgetFocus
   -> Maybe Icon
   -> Maybe String
   -> Draw ()
-choiceButton pos@(V2 x y) sz@(V2 w _h) flags state mIcon mLabel = do
-  let [cr0, cr1, cr2, cr3] = selectCorners bndToolRadius flags
+choiceButton pos@(V2 x y) sz@(V2 w _h) corners state mIcon mLabel = do
+  let cf = selectCorners bndToolRadius corners
 
   Theme{..} <- theme
 
-  bevelInset pos sz cr2 cr3 tBg
+  bevelInset pos sz cf tBg
   let (i1, i2) = innerColors state tChoice True
 
-  innerBox   pos sz cr0 cr1 cr2 cr3 i1 i2
-  outlineBox pos sz cr0 cr1 cr2 cr3 (trans (wtOutline tChoice))
+  innerBox   pos sz cf i1 i2
+  outlineBox pos sz cf (trans (wtOutline tChoice))
 
-  let tc = textColor state tRadio
+  let tc = textColor state tChoice
   iconLabelValue tIcons pos sz mIcon tc ACenter tFont tFontSize mLabel Nothing
   upDownArrow (V2 (x + w - 10) (y + 10)) 5 (trans (wtItem tChoice))

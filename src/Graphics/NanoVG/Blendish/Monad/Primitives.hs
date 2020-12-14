@@ -14,9 +14,11 @@ import qualified Data.Text
 import Graphics.NanoVG.Blendish.Context
 import Graphics.NanoVG.Blendish.Icon
 import Graphics.NanoVG.Blendish.Theme
+import Graphics.NanoVG.Blendish.Types
 import Graphics.NanoVG.Blendish.Monad.Wrappers
 import Graphics.NanoVG.Blendish.Monad.Combinators
 import Graphics.NanoVG.Blendish.Utils
+import Graphics.NanoVG.Blendish.Shorthand
 
 import Linear (V2(V2), V4(V4))
 
@@ -26,12 +28,9 @@ data Align = ALeft | ARight | ACenter
 roundBox
   :: V2 Float
   -> V2 Float
-  -> Float
-  -> Float
-  -> Float
-  -> Float
+  -> Corners Float
   -> Draw ()
-roundBox (V2 x y) (V2 w h) cr0 cr1 cr2 cr3 = do
+roundBox (V2 x y) (V2 w h) (Corners cr0 cr1 cr2 cr3) = do
     beginPath
     moveTo (V2 x (y + h*0.5))
     arcTo (V2 x       y)       (V2 (x + w) y)       (min cr0 (d / 2))
@@ -77,12 +76,12 @@ bevel (V2 x' y') (V2 w' h') bgColor = do
 bevelInset
  :: V2 Float
  -> V2 Float
- -> Float
- -> Float
+ -> Corners Float
  -> Color
  -> Draw ()
-bevelInset (V2 x y') (V2 w h) cr2' cr3' bgColor = do
-  let y = y' - 0.5
+bevelInset (V2 x y') (V2 w h) corners bgColor = do
+  let (cr2', cr3') = downCorners corners
+      y = y' - 0.5
       d = min w h
       cr2 = min cr2' (d / 2)
       cr3 = min cr3' (d / 2)
@@ -146,14 +145,11 @@ dropShadow (V2 x y') (V2 w h') r feather alpha = do
 innerBox
   :: V2 Float
   -> V2 Float
-  -> Float
-  -> Float
-  -> Float
-  -> Float
+  -> Corners Float
   -> Color
   -> Color
   -> Draw ()
-innerBox (V2 x y) (V2 w h) cr0 cr1 cr2 cr3 shadeTop shadeDown = do
+innerBox (V2 x y) (V2 w h) corners shadeTop shadeDown = do
   withFill (do
     pain <- linearGradient
       (V2 x y)
@@ -167,26 +163,20 @@ innerBox (V2 x y) (V2 w h) cr0 cr1 cr2 cr3 shadeTop shadeDown = do
     roundBox
       (V2 (x + 1) (y + 1))
       (V2 (w - 2) (h - 3))
-      (max 0 (cr0 - 1))
-      (max 0 (cr1 - 1))
-      (max 0 (cr2 - 1))
-      (max 0 (cr3 - 1))
+      (fmap (\cr -> max 0 (cr - 1)) corners)
 
 outlineBox
   :: V2 Float
   -> V2 Float
-  -> Float
-  -> Float
-  -> Float
-  -> Float
+  -> Corners Float
   -> Color
   -> Draw ()
-outlineBox (V2 x y) (V2 w h) cr0 cr1 cr2 cr3 color = do
+outlineBox (V2 x y) (V2 w h) corners color = do
   withStrokeColor color
     $ roundBox
       (V2 (x + 0.5) (y + 0.5))
       (V2 (w - 1) (h - 2))
-      cr0 cr1 cr2 cr3
+      corners
 
 icon :: NanoVG.Image -> Float -> Float -> Icon -> Draw ()
 icon icons x y ico = do

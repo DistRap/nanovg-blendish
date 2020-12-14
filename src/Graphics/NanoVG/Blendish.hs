@@ -275,11 +275,11 @@ drawElem (Rekt x y w h b@(Button Attrs{..})) = do
     modify (\x' -> x' { events = [b] })
 
   let corners = case inHBox of
-        False -> []
+        False -> pure True
         True -> case (firstElem, lastElem) of
-          (True, _) -> [TopRight, DownRight]
-          (_, True) -> [TopLeft, DownLeft]
-          _         -> [TopRight, DownRight, TopLeft, DownLeft]
+          (True, _) -> (pure True) { topRight = False, downRight = False }
+          (_, True) -> (pure True) { topLeft = False, downLeft = False }
+          _         -> pure False
 
   lift $ toolButton
     (V2 (fromIntegral x) (fromIntegral y))

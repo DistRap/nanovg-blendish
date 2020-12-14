@@ -109,7 +109,7 @@ dropShadow
  -> V2 Float
  -> Float
  -> Float
- -> Int
+ -> Float
  -> Draw ()
 dropShadow (V2 x y') (V2 w h') r feather alpha = do
   let y = y' + feather
@@ -121,7 +121,7 @@ dropShadow (V2 x y') (V2 w h') r feather alpha = do
       (V2 (w + feather) (h + feather))
       (r + feather * 0.5)
       feather
-      (rgba 0 0 0 (alpha ^ (2 :: Int)))
+      (rgbaf 0 0 0 (alpha ** 2))
       (rgba 0 0 0 0)
 
     fillPaint pain
@@ -132,7 +132,7 @@ dropShadow (V2 x y') (V2 w h') r feather alpha = do
       lineTo (V2  x                (y + h - feather))
 
       arcTo  (V2  x                (y + h)) (V2 (x + r) (y + h)) r
-      arcTo  (V2 (x + h)           (y + h)) (V2 (x + w) (y + h - r)) r
+      arcTo  (V2 (x + w)           (y + h)) (V2 (x + w) (y + h - r)) r
 
       lineTo (V2 (x + w)           (y - feather))
       lineTo (V2 (x + w + feather) (y - feather))

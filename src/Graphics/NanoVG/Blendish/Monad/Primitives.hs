@@ -196,16 +196,15 @@ icon icons x y ico = do
     ) (rect (V2 x y) (pure (fromIntegral res)))
 
 iconLabelValue
-  :: Integral a
-  => Image
+  :: Image
   -> V2 Float
   -> V2 Float
   -> Maybe Icon
   -> Color
   -> Align
-  -> Data.Text.Text
-  -> a
-  -> Maybe String
+  -> Text
+  -> Int
+  -> Maybe Text
   -> Maybe Text
   -> Draw ()
 iconLabelValue icons (V2 x y) (V2 w h) mIconId color align font fontSize' mLabel mValue = do
@@ -214,7 +213,7 @@ iconLabelValue icons (V2 x y) (V2 w h) mIconId color align font fontSize' mLabel
     Just iconId -> icon icons (x + 4) (y + 2) iconId
 
   let pLeft = bndPadLeft + maybe 0 (pure bndIconSheetRes) mIconId
-      label = Data.Text.pack $ maybe mempty id mLabel
+      label = maybe mempty id mLabel
 
   fontFace font
   fontSize $ fromIntegral fontSize'

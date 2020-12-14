@@ -2,6 +2,8 @@
 
 module Graphics.NanoVG.Blendish.Monad where
 
+import Data.Text (Text)
+
 import Graphics.NanoVG.Blendish.Context
 import Graphics.NanoVG.Blendish.Icon
 import Graphics.NanoVG.Blendish.Types
@@ -65,7 +67,7 @@ choiceButton
   -> Corners Bool
   -> WidgetFocus
   -> Maybe Icon
-  -> Maybe String
+  -> Maybe Text
   -> Draw ()
 choiceButton pos@(V2 x y) sz@(V2 w _h) corners state mIcon mLabel = do
   let cf = selectCorners bndToolRadius corners

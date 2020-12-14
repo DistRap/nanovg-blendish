@@ -287,7 +287,7 @@ drawElem (Rekt x y w h b@(Button Attrs{..})) = do
     corners
     state'
     aIcon
-    (Data.Text.unpack <$> aLabel)
+    aLabel
 
 drawElem (HBox es) = do
   modify (\x -> x { inHBox = True })

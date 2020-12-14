@@ -37,10 +37,11 @@ import Graphics.NanoVG.Blendish.Icon
 --import Graphics.NanoVG.Blendish.IconModuleGenerator
 import Graphics.NanoVG.Blendish.Context
 import Graphics.NanoVG.Blendish.Monad
+import Graphics.NanoVG.Blendish.Monad.Primitives
 --import Graphics.NanoVG.Blendish.Shorthand
 import Graphics.NanoVG.Blendish.Types
 import Graphics.NanoVG.Blendish.Theme
---import Graphics.NanoVG.Blendish.Utils
+import Graphics.NanoVG.Blendish.Utils
 import Paths_nanovg_blendish
 
 import Graphics.GL.Core33
@@ -69,13 +70,13 @@ main = do
 
     let loop = do
                 -- update graphics input
-                (w,h) <- GLFW.getWindowSize win >>= \(w,h) -> do
+                (winW,winH) <- GLFW.getWindowSize win >>= \(w,h) -> do
                   return (w, h)
 
                 Just _t <- GLFW.getTime
                 (mx, my) <- GLFW.getCursorPos win
                 (fbW, fbH) <- GLFW.getFramebufferSize win
-                let pxRatio = fromIntegral fbW / fromIntegral w
+                let pxRatio = fromIntegral fbW / fromIntegral winW
 
                 --glViewport 0 0 (fromIntegral fbW) (fromIntegral fbH)
                 -- 3d
@@ -95,7 +96,7 @@ main = do
                 let mb = case mb1 of
                             GLFW.MouseButtonState'Pressed -> [ MouseButton'1 ]
                             _ -> []
-                NanoVG.beginFrame c (fromIntegral w `div` 1) (fromIntegral h `div` 1) (pxRatio * 1.0)
+                NanoVG.beginFrame c (fromIntegral winW) (fromIntegral winH) (pxRatio * 1.0)
                 renderUI c da mx my mb
                 NanoVG.endFrame c
 

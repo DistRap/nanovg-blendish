@@ -39,5 +39,3 @@ rgbf1 x = rgbf x x x
 
 rgbaf1 :: Float -> Float -> Color
 rgbaf1 x a = rgbaf x x x a
-
-

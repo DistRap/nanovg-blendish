@@ -175,6 +175,8 @@ renderUI ctx (UIData _ icons) x y mb = do
 
     tooltipBackground (V2 10 150) (V2 60 60)
 
+    menuBackground (V2 10 230) (V2 60 60) (pure True)
+
   let b = Button (ico Icon'Speaker $ label' "Up" $ defA ()) -- (Just Icon'Speaker) "Count up"
       c = Button (defA () & ico Icon'Dot & label' "Down") -- (Just Icon'Dot) "Count down"
 

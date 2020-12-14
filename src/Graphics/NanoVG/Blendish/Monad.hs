@@ -239,3 +239,18 @@ tooltipBackground pos sz@(V2 w h) = do
   innerBox   pos (V2 w (h+1)) cf i1 i2
   outlineBox pos (V2 w (h+1)) cf (trans (wtOutline tToolTip))
   dropShadow pos sz bndMenuRadius bndShadowFeather bndShadowAlpha
+
+menuBackground
+  :: V2 Float
+  -> V2 Float
+  -> Corners Bool
+  -> Draw ()
+menuBackground pos sz@(V2 w h) corners = do
+  Theme{..} <- theme
+
+  let cf = selectCorners bndToolRadius corners
+      (i1, i2) = innerColors NoFocus tMenu False
+
+  innerBox   pos (V2 w (h+1)) cf i1 i2
+  outlineBox pos (V2 w (h+1)) cf (trans (wtOutline tMenu))
+  dropShadow pos sz bndMenuRadius bndShadowFeather bndShadowAlpha

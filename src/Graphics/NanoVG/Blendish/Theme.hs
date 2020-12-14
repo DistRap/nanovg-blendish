@@ -134,15 +134,7 @@ scrollBarTheme = shadeTopDown 5 (-5) $ shapeColors
   def
 
 toolTipTheme :: WidgetTheme
-toolTipTheme = shapeColors
-  black
-  (rgbf 0.392 0.392 0.392)
-  (rgbaf 0.098 0.098 0.098 0.902)
-  (rgbaf 0.176 0.176 0.176 0.902)
-  $ textColors
-  (rgbf1 0.627)
-  bndColorTextSelected
-  def
+toolTipTheme = menuTheme
 
 menuTheme :: WidgetTheme
 menuTheme = shapeColors
@@ -165,7 +157,6 @@ menuItemTheme = shadeTopDown 38 0 $ shapeColors
   bndColorTextSelected
   bndColorText
   def
-
 
 data NodeTheme = NodeTheme {
     ntSelected      :: Color

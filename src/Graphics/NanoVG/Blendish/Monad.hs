@@ -225,3 +225,17 @@ scrollbar pos@(V2 x y) sz@(V2 w h) focus offset size = do
     (offsetColor itemColor (3 * wtShadeDown tScrollBar))
     (offsetColor itemColor (3 * wtShadeTop tScrollBar))
   outlineBox handlePos handleSize (pure bndScrollBarRadius) (trans $ wtOutline tScrollBar)
+
+tooltipBackground
+  :: V2 Float
+  -> V2 Float
+  -> Draw ()
+tooltipBackground pos sz@(V2 w h) = do
+  Theme{..} <- theme
+
+  let cf = pure bndMenuRadius
+      (i1, i2) = innerColors NoFocus tToolTip False
+
+  innerBox   pos (V2 w (h+1)) cf i1 i2
+  outlineBox pos (V2 w (h+1)) cf (trans (wtOutline tToolTip))
+  dropShadow pos sz bndMenuRadius bndShadowFeather bndShadowAlpha

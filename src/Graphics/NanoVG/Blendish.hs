@@ -173,6 +173,7 @@ renderUI ctx (UIData _ icons) x y mb = do
     scrollbar (V2 60 30) (V2 10 100)
       ActiveFocus 0.5 0.4
 
+    tooltipBackground (V2 10 150) (V2 60 60)
 
   let b = Button (ico Icon'Speaker $ label' "Up" $ defA ()) -- (Just Icon'Speaker) "Count up"
       c = Button (defA () & ico Icon'Dot & label' "Down") -- (Just Icon'Dot) "Count down"

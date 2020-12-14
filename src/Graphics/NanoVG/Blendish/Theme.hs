@@ -399,3 +399,6 @@ bndVspacingGroup = 8
 
 bndHspacing :: Float
 bndHspacing = 8
+
+bndMenuRadius :: Float
+bndMenuRadius = 3

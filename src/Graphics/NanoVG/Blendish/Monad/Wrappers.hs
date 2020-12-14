@@ -19,6 +19,12 @@ beginPath = withCtx NanoVG.beginPath
 closePath :: Draw ()
 closePath = withCtx NanoVG.closePath
 
+scissor :: V2 Float -> V2 Float -> Draw ()
+scissor (V2 x y) (V2 w h) = withCtx $ \c -> NanoVG.scissor c (cvt x) (cvt y) (cvt w) (cvt h)
+
+resetScissor :: Draw ()
+resetScissor = withCtx NanoVG.resetScissor
+
 moveTo :: V2 Float -> Draw ()
 moveTo (V2 x y) = withCtx $ \c -> NanoVG.moveTo c (cvt x) (cvt y)
 

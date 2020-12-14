@@ -122,7 +122,7 @@ renderUI ctx (UIData _ icons) x y mb = do
 
     Theme{..} <- theme
     background (V2 0 0) (V2 1024 (100 * sp)) tBg -- (rgbaf 0.9 0.9 0.9 0.9) -- tBg
-    label (V2 10 10) (V2 100 10) Nothing "Label"
+    label (V2 0 bndWidgetHeight) (V2 100 10) Nothing "Demo Label"
 
     toolButton (V2 100 10) (V2 200 21)
       (pure True) NoFocus (Just Icon'Particles) (Just "Tool button")

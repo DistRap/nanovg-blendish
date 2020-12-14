@@ -10,7 +10,7 @@ import Graphics.NanoVG.Blendish.Icon
 import Graphics.NanoVG.Blendish.Types
 import Graphics.NanoVG.Blendish.Theme
 import Graphics.NanoVG.Blendish.Utils
---import Graphics.NanoVG.Blendish.Monad.Combinators
+import Graphics.NanoVG.Blendish.Monad.Combinators
 import Graphics.NanoVG.Blendish.Monad.Primitives
 --import Graphics.NanoVG.Blendish.Monad.Wrappers
 
@@ -158,3 +158,40 @@ label pos sz mIcon labelText = do
   Theme{..} <- theme
   let tc = wtText tRegular
   iconLabelValue tIcons pos sz mIcon tc ACenter tFont tFontSize (Just labelText) Nothing
+
+slider
+  :: V2 Float
+  -> V2 Float
+  -> Corners Bool
+  -> WidgetFocus
+  -> Float -- ^ progress
+  -> Text
+  -> Text
+  -> Draw ()
+slider pos sz@(V2 w h) corners focus progress labelText value = do
+  let cf = selectCorners bndNumberRadius corners
+
+  Theme{..} <- theme
+
+  bevelInset pos sz cf tBg
+  let (i1, i2) = innerColors focus tSlider True
+
+  innerBox   pos sz cf i1 i2
+
+  let (innerShade1, innerShade2) = case focus of
+        ActiveFocus ->
+          ( offsetColor (wtItem tSlider) (wtShadeTop tSlider)
+          , offsetColor (wtItem tSlider) (wtShadeDown tSlider)
+          )
+        _ ->
+          ( offsetColor (wtItem tSlider) (wtShadeDown tSlider)
+          , offsetColor (wtItem tSlider) (wtShadeTop tSlider)
+          )
+
+  withScissor pos (V2 (8 + (w - 8) * clamp progress 0 1) h) $
+    innerBox pos sz cf innerShade1 innerShade2
+
+  outlineBox pos sz cf (trans (wtOutline tSlider))
+
+  let tc = textColor focus tSlider
+  iconLabelValue tIcons pos sz Nothing tc ACenter tFont tFontSize (Just labelText) (Just value)

@@ -154,6 +154,14 @@ renderUI ctx (UIData _ icons) x y mb = do
     optionButton (V2 100 (10 + (8*sp))) (V2 200 bndWidgetHeight)
       ActiveFocus "Active option"
 
+    let row2 = 330
+    slider (V2 row2 (10 + (0*sp))) (V2 200 bndWidgetHeight)
+      (pure True) NoFocus 0.5 "Default slider" "0.5"
+    slider (V2 row2 (10 + (1*sp))) (V2 200 bndWidgetHeight)
+      (pure True) HasFocus 0.7 "Focused slider" "0.7"
+    slider (V2 row2 (10 + (2*sp))) (V2 200 bndWidgetHeight)
+      (pure True) ActiveFocus 0.9 "Active slider" "0.9"
+
 
   let b = Button (ico Icon'Speaker $ label' "Up" $ defA ()) -- (Just Icon'Speaker) "Count up"
       c = Button (defA () & ico Icon'Dot & label' "Down") -- (Just Icon'Dot) "Count down"

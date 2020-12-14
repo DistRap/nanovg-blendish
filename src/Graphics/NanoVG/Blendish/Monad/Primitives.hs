@@ -371,9 +371,9 @@ upDownArrow (V2 x y) s color = withFillColor color $ do
   lineTo (V2 (x + 0.5 * w) (y - s - 1))
   lineTo (V2 (x + w) (y - 1))
   closePath
-  moveTo (V2 x (y - 1))
+  moveTo (V2 x (y + 1))
   lineTo (V2 (x + 0.5 * w) (y + s + 1))
-  lineTo (V2 (x + w) (y - 1))
+  lineTo (V2 (x + w) (y + 1))
   closePath
   where w = s * 1.1
 

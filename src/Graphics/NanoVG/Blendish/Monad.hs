@@ -32,7 +32,7 @@ toolButton pos sz corners state mIcon mLabel = do
   Theme{..} <- theme
 
   bevelInset pos sz cf tBg
-  let (i1, i2) = innerColors state tTool True
+  let (i1, i2) = innerColors state tTool False
 
   innerBox   pos sz cf i1 i2
   outlineBox pos sz cf (trans (wtOutline tTool))
@@ -54,7 +54,7 @@ radioButton pos sz corners state mIcon mLabel = do
   Theme{..} <- theme
 
   bevelInset pos sz cf tBg
-  let (i1, i2) = innerColors state tRadio True
+  let (i1, i2) = innerColors state tRadio False
 
   innerBox   pos sz cf i1 i2
   outlineBox pos sz cf (trans (wtOutline tRadio))
@@ -76,7 +76,7 @@ choiceButton pos@(V2 x y) sz@(V2 w _h) corners state mIcon mLabel = do
   Theme{..} <- theme
 
   bevelInset pos sz cf tBg
-  let (i1, i2) = innerColors state tChoice True
+  let (i1, i2) = innerColors state tChoice False
 
   innerBox   pos sz cf i1 i2
   outlineBox pos sz cf (trans (wtOutline tChoice))
@@ -94,7 +94,7 @@ optionButton
 optionButton (V2 x y) (V2 w h) state labelText = do
   Theme{..} <- theme
 
-  let (i1, i2) = innerColors state tOption True
+  let (i1, i2) = innerColors state tOption False
       corners = pure bndOptionRadius
       checkBoxPos = V2 x (y + h - bndOptionHeight - 3)
       checkBoxSize = V2 bndOptionWidth bndOptionHeight
@@ -138,7 +138,7 @@ numberField pos@(V2 x y) sz@(V2 w _h) corners focus labelText value = do
   Theme{..} <- theme
 
   bevelInset pos sz cf tBg
-  let (i1, i2) = innerColors focus tNumberField True
+  let (i1, i2) = innerColors focus tNumberField False
 
   innerBox   pos sz cf i1 i2
   outlineBox pos sz cf (trans (wtOutline tNumberField))
@@ -174,7 +174,7 @@ slider pos sz@(V2 w h) corners focus progress labelText value = do
   Theme{..} <- theme
 
   bevelInset pos sz cf tBg
-  let (i1, i2) = innerColors focus tSlider True
+  let (i1, i2) = innerColors focus tSlider False
 
   innerBox   pos sz cf i1 i2
 

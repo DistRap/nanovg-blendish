@@ -245,9 +245,10 @@ iconLabelValue icons (V2 x y) (V2 w h) mIconId color align font fontSize' mLabel
         _ -> return $ x + fromIntegral pLeft
 
       let yoff = y + h - bndTextPadDown
+          fudge = 1.5 -- XXX: "fix" kerning of 'val : 1'
 
       text (V2 xoff yoff) label
-      text (V2 (xoff + labWidth) yoff) sep
+      text (V2 (xoff + labWidth - fudge) yoff) sep
       text (V2 (xoff + labWidth + sepWidth) yoff) value
 
       -- debug value separator boxes

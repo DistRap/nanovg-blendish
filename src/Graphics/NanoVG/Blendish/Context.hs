@@ -20,5 +20,3 @@ theme = ask >>= return . ctxTheme
 
 withCtx :: (Context -> IO a) -> Draw a
 withCtx op = ask >>= liftIO . op . ctxNvg
-
-

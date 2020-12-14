@@ -9,6 +9,7 @@ import Graphics.UI.GLFW (WindowHint(..), OpenGLProfile(..), Key(..), MouseButton
 import qualified Graphics.UI.GLFW as GLFW
 
 import Data.Function ((&))
+import Data.Bits ((.|.))
 -- 2D
 import qualified Data.Bits
 import qualified Data.Set as S
@@ -52,21 +53,13 @@ foreign import ccall unsafe "initGlew"
 
 main :: IO ()
 main = do
-    -- load image and upload texture
-    --Right img <- Juicy.readImage "logo.png"
-    --
     win <- initWindow "nanovg-blendish" 1920 1080
     c@(NanoVG.Context _c') <- NanoVG.createGL3 (S.fromList [Antialias,StencilStrokes,Debug])
-    --fbo' <- alloca (\ptr -> glGenFramebuffers 1 ptr >> peek ptr)
 
     mdata <- runMaybeT $ loadData c
     da <- case mdata of
       Nothing -> error "Unable to load data"
       Just x -> return x
-
-
-    --GLFW.setMouseButtonCallback win . pure $
-    --
 
     let loop = do
                 -- update graphics input
@@ -78,32 +71,19 @@ main = do
                 (fbW, fbH) <- GLFW.getFramebufferSize win
                 let pxRatio = fromIntegral fbW / fromIntegral winW
 
-                --glViewport 0 0 (fromIntegral fbW) (fromIntegral fbH)
-                -- 3d
-
                 -- NANO
                 glViewport 0 0 (fromIntegral fbW) (fromIntegral fbH)
+                glClearColor 0.3 0.3 0.32 1.0
+                glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
 
-                --glViewport 0 0 (fromIntegral w) (fromIntegral h)
-                --glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
-                --glClear (GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
-                --beginFrame c (fromIntegral w) (fromIntegral h) pxRatio
-                --glClear (GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
-
-                --print (pxRatio, w, h, fbW, fbH, mx, my)
-                --NanoVG.beginFrame c (fromIntegral w `div` 2) (fromIntegral h `div` 2) (pxRatio * 2.9)
                 mb1 <- GLFW.getMouseButton win MouseButton'1
                 let mb = case mb1 of
                             GLFW.MouseButtonState'Pressed -> [ MouseButton'1 ]
                             _ -> []
+
                 NanoVG.beginFrame c (fromIntegral winW) (fromIntegral winH) (pxRatio * 1.0)
                 renderUI c da mx my mb
                 NanoVG.endFrame c
-
-                --glEnable (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
-                --glBlendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
-                --glEnable GL_CULL_FACE
-                --glCullFace GL_BACK
 
                 GLFW.swapBuffers win
                 GLFW.pollEvents
@@ -121,7 +101,6 @@ main = do
 
 data UIData = UIData Font NanoVG.Image
 
-
 loadData :: NanoVG.Context -> MaybeT IO UIData
 loadData c = do
   (fontFile, iconsFile) <- liftIO $
@@ -133,43 +112,56 @@ loadData c = do
 
 renderUI :: NanoVG.Context -> UIData -> Double -> Double -> [MouseButton] -> IO ()
 renderUI ctx (UIData _ icons) x y mb = do
-  --bg <- linearGradient c x y x (y+h) (rgba 0 16 192 0) (rgba 0 160 192 64)
-  --NanoVG.beginPath c
-  --NanoVG.rect c 10 10 100 300
-  --NanoVG.fillColor c (rgba 255 255 255 32)
-  --NanoVG.fill c
-
-  NanoVG.fontSize ctx 148
+  NanoVG.fontSize ctx 18
   NanoVG.fontFace ctx "sans"
 
-  NanoVG.globalAlpha ctx 0.5
+  NanoVG.globalAlpha ctx 0.9
 
   _w <- flip runReaderT (UIContext ctx (defTheme icons) (x, y)) $ do
     let sp = bndWidgetHeight + 5
 
-    -- Theme{..} <- theme
-    --background (V2 0 0) (V2 1024 (100 * sp)) tBg -- (rgbaf 0.9 0.9 0.9 0.9) -- tBg
+    Theme{..} <- theme
+    background (V2 0 0) (V2 1024 (100 * sp)) tBg -- (rgbaf 0.9 0.9 0.9 0.9) -- tBg
+    label (V2 10 10) (V2 100 10) Nothing "Label"
+
     toolButton (V2 100 10) (V2 200 21)
-      [] NoFocus (Just Icon'Particles) (Just "Tool button")
+      (pure True) NoFocus (Just Icon'Particles) (Just "Tool button")
 
     toolButton (V2 100 (10 + sp)) (V2 200 bndWidgetHeight)
-      [] HasFocus (Just Icon'Speaker) (Just "Focus button")
+      (pure True) HasFocus (Just Icon'Speaker) (Just "Focus button")
 
     toolButton (V2 100 (10 + (2*sp))) (V2 200 bndWidgetHeight)
-      [] ActiveFocus (Just Icon'Physics) (Just "Active button")
+      (pure True) ActiveFocus (Just Icon'Physics) (Just "Active button")
 
     radioButton (V2 100 (10 + (3*sp))) (V2 200 bndWidgetHeight)
-      [] NoFocus (Just Icon'9_AA) (Just "Radio button")
+      (pure True) NoFocus (Just Icon'9_AA) (Just "Radio button")
 
-  let b = Button (ico Icon'Speaker $ label "Up" $ defA ()) -- (Just Icon'Speaker) "Count up"
-      c = Button (defA () & ico Icon'Dot & label "Down") -- (Just Icon'Dot) "Count down"
+    choiceButton (V2 100 (10 + (4*sp))) (V2 200 bndWidgetHeight)
+      (pure True) NoFocus (Just Icon'Bookmarks) (Just "Choice button")
 
+    --colorButton (V2 100 (10 + (5*sp))) (V2 200 bndWidgetHeight)
+    --  (pure True) (rgbf 0.5 0.3 0.2)
+    --
+    numberField (V2 100 (10 + (5*sp))) (V2 200 bndWidgetHeight)
+      (pure True) NoFocus "Value" "3000"
+
+    numberField (V2 100 (10 + (6*sp))) (V2 200 bndWidgetHeight)
+      (pure True) HasFocus "Focus Val" "666"
+
+    numberField (V2 100 (10 + (7*sp))) (V2 200 bndWidgetHeight)
+      (pure True) ActiveFocus "Active Val" "1337"
+
+    optionButton (V2 100 (10 + (8*sp))) (V2 200 bndWidgetHeight)
+      ActiveFocus "Active option"
+
+
+  let b = Button (ico Icon'Speaker $ label' "Up" $ defA ()) -- (Just Icon'Speaker) "Count up"
+      c = Button (defA () & ico Icon'Dot & label' "Down") -- (Just Icon'Dot) "Count down"
 
   _zz <- newTVarIO $ HBox [
            Rekt 30 100 100 21 b
          , Rekt 127 100 100 21 c
          ]
-
 
   -- bricklike
   -- State -> Event -> State
@@ -179,8 +171,8 @@ renderUI ctx (UIData _ icons) x y mb = do
     $ flip runStateT (defRS x y mb) $ do
        drawElem $
          HBox [
-           Rekt 30 100 100 21 b
-         , Rekt 127 100 100 21 c
+           Rekt 30 300 100 21 b
+         , Rekt 127 300 100 21 c
          ]
   --print (show $ map fst $ hs b, show $ events $ snd w)
 
@@ -223,8 +215,8 @@ defA a = Attrs Nothing Nothing a []
 ico :: Icon -> Attrs a -> Attrs a
 ico i x = x { aIcon = Just i }
 
-label :: Text -> Attrs a -> Attrs a
-label i x = x { aLabel = Just i }
+label' :: Text -> Attrs a -> Attrs a
+label' i x = x { aLabel = Just i }
 
 value :: a -> Attrs a -> Attrs a
 value i x = x { aValue = i }
@@ -319,7 +311,7 @@ initWindow title width height = do
       , WindowHint'ContextVersionMinor 3
       , WindowHint'OpenGLProfile OpenGLProfile'Core
       , WindowHint'OpenGLForwardCompat True
-      , WindowHint'Samples $ Just 16 -- MSAA 16
+      -- , WindowHint'Samples $ Just 16 -- MSAA 16
       , WindowHint'Resizable True
       , WindowHint'Decorated False
       , WindowHint'DoubleBuffer True

@@ -356,7 +356,7 @@ bndMaxRows :: Integer
 bndMaxRows = 32
 
 bndTextPadDown :: Float
-bndTextPadDown = 7
+bndTextPadDown = 6
 
 
 bndNodeWireOutlineWidth :: Float

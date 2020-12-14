@@ -82,11 +82,22 @@ toolTheme :: WidgetTheme
 toolTheme =  fifteenShades def
 
 radioTheme :: WidgetTheme
-radioTheme = fifteenShades $ shapeColors
-  black white
-  (rgbf 0.275 0.275 0.275)
-  (rgbf 0.337 0.502 0.761)
-  def
+radioTheme =
+    fifteenShades
+  $ shapeColors
+      black white
+      (rgbf 0.275 0.275 0.275)
+      (rgbf 0.337 0.502 0.761)
+  $ textColors
+      bndColorTextSelected
+      bndColorText
+      def
+
+choiceTheme :: WidgetTheme
+choiceTheme = textColors
+  bndColorTextSelected
+  (rgbf 0.8   0.8   0.8  )
+  optionTheme
 
 textFieldTheme :: WidgetTheme
 textFieldTheme = shadeTopDown 0 25 $ shapeColors
@@ -102,12 +113,6 @@ optionTheme = fifteenShades $ shapeColors
   (rgbf 0.275 0.275 0.275)
   (rgbf 0.275 0.275 0.275)
   def
-
-choiceTheme :: WidgetTheme
-choiceTheme = textColors
-  bndColorTextSelected
-  (rgbf 0.8   0.8   0.8  )
-  optionTheme
 
 numberFieldTheme :: WidgetTheme
 numberFieldTheme = shadeTopDown (-20) 0 $ shapeColors

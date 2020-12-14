@@ -152,6 +152,10 @@ renderUI ctx (UIData _ icons) x y mb = do
       (pure True) ActiveFocus "Active Val" "1337"
 
     optionButton (V2 100 (10 + (8*sp))) (V2 200 bndWidgetHeight)
+      NoFocus "Option"
+    optionButton (V2 100 (10 + (9*sp))) (V2 200 bndWidgetHeight)
+      HasFocus "Focused Option"
+    optionButton (V2 100 (10 + (10*sp))) (V2 200 bndWidgetHeight)
       ActiveFocus "Active option"
 
     let row2 = 330
@@ -161,6 +165,13 @@ renderUI ctx (UIData _ icons) x y mb = do
       (pure True) HasFocus 0.7 "Focused slider" "0.7"
     slider (V2 row2 (10 + (2*sp))) (V2 200 bndWidgetHeight)
       (pure True) ActiveFocus 0.9 "Active slider" "0.9"
+
+    scrollbar (V2 20 30) (V2 10 100)
+      NoFocus 0.5 0.4
+    scrollbar (V2 40 30) (V2 10 100)
+      HasFocus 0.5 0.4
+    scrollbar (V2 60 30) (V2 10 100)
+      ActiveFocus 0.5 0.4
 
 
   let b = Button (ico Icon'Speaker $ label' "Up" $ defA ()) -- (Just Icon'Speaker) "Count up"

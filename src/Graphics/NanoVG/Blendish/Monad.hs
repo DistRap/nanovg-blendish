@@ -91,7 +91,7 @@ optionButton
   -> WidgetFocus
   -> Text
   -> Draw ()
-optionButton pos@(V2 x y) (V2 w h) state labelText = do
+optionButton (V2 x y) (V2 w h) state labelText = do
   Theme{..} <- theme
 
   let (i1, i2) = innerColors state tOption True
@@ -195,3 +195,33 @@ slider pos sz@(V2 w h) corners focus progress labelText value = do
 
   let tc = textColor focus tSlider
   iconLabelValue tIcons pos sz Nothing tc ACenter tFont tFontSize (Just labelText) (Just value)
+
+scrollbar
+  :: V2 Float
+  -> V2 Float
+  -> WidgetFocus
+  -> Float -- ^ offset
+  -> Float -- ^ size
+  -> Draw ()
+scrollbar pos@(V2 x y) sz@(V2 w h) focus offset size = do
+  Theme{..} <- theme
+
+  bevelInset pos sz (pure bndScrollBarRadius) tBg
+  innerBox pos sz (pure bndScrollBarRadius)
+    (offsetColor (wtInner tScrollBar) (3 * wtShadeDown tScrollBar))
+    (offsetColor (wtInner tScrollBar) (3 * wtShadeTop tScrollBar))
+
+  outlineBox pos sz (pure bndScrollBarRadius) (wtOutline tScrollBar)
+
+  let itemColor = offsetColor (wtItem tScrollBar) (if focus == ActiveFocus then bndScrollBarActiveShade else 0)
+  let (handlePos, handleSize) =
+        let cSize = clamp size 0 1
+            cOffset = clamp offset 0 1
+        in
+        if h > w then let hs = max (cSize * h) (w + 1) in ((V2 x (y + (h-hs)*cOffset)), (V2 w hs))
+                 else let ws = max (cSize * w) (h - 1) in ((V2 (x + (w-ws)*cOffset) y), (V2 ws h))
+
+  innerBox handlePos handleSize (pure bndScrollBarRadius)
+    (offsetColor itemColor (3 * wtShadeDown tScrollBar))
+    (offsetColor itemColor (3 * wtShadeTop tScrollBar))
+  outlineBox handlePos handleSize (pure bndScrollBarRadius) (trans $ wtOutline tScrollBar)

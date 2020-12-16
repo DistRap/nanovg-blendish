@@ -399,3 +399,55 @@ splitter pos@(V2 x y) sz@(V2 w h) = do
     forM_ [12, 8, 4] $ \k -> do
       moveTo (V2 (x2 - k) y)
       lineTo (V2 x2 (y + k))
+
+menuLabel
+  :: V2 Float
+  -> V2 Float
+  -> Maybe Icon
+  -> Text
+  -> Draw ()
+menuLabel pos sz mIcon labelText = do
+  Theme{..} <- theme
+  iconLabelValue
+    tIcons
+    pos
+    sz
+    mIcon
+    (textColor NoFocus tMenu)
+    ALeft
+    tFont
+    bndLabelFontSize
+    (Just labelText)
+    Nothing
+
+menuItem
+  :: V2 Float
+  -> V2 Float
+  -> Maybe Icon
+  -> WidgetFocus
+  -> Text
+  -> Draw ()
+menuItem pos sz mIcon focus labelText = do
+  Theme{..} <- theme
+  focus' <- case focus of
+    NoFocus -> return focus
+    _ -> do
+      innerBox
+        pos
+        sz
+        (pure 0)
+        (offsetColor (wtInnerSelected tMenuItem) (wtShadeTop tMenuItem))
+        (offsetColor (wtInnerSelected tMenuItem) (wtShadeDown tMenuItem))
+      return ActiveFocus
+
+  iconLabelValue
+    tIcons
+    pos
+    sz
+    mIcon
+    (textColor focus' tMenuItem)
+    ALeft
+    tFont
+    bndLabelFontSize
+    (Just labelText)
+    Nothing

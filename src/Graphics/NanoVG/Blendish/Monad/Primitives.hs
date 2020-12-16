@@ -217,7 +217,7 @@ iconLabelValue icons (V2 x y) (V2 w h) mIconId color align font fontSize' mLabel
 
   fontFace font
   fontSize $ fromIntegral fontSize'
-  withFillColor color $ return ()
+  fillColor color
 
   case mValue of
     Nothing -> do
@@ -278,25 +278,24 @@ nodeIconLabel
 nodeIconLabel icons (V2 x y) (V2 w h) mIconId color shadowColor align font fontSize' label = do
   case mIconId of
     Nothing -> return ()
-    Just iconId -> icon icons (x + 4) (y + 2) iconId
-
-  let pLeft = bndPadLeft + maybe 0 (pure bndIconSheetRes) mIconId
+    Just iconId -> icon icons (x + w - fromIntegral bndIconSheetRes) (y + 3) iconId
 
   fontFace font
   fontSize $ fromIntegral fontSize'
-  withFillColor shadowColor $ return ()
-  fontBlur bndShadowFeather
+  fillColor shadowColor
+
+  fontBlur bndNodeTitleFeather
   textAlign (Data.Set.fromList [if align == ALeft then NanoVG.AlignLeft else NanoVG.AlignCenter, NanoVG.AlignBaseline])
   textBox
-        (V2 (1 + x + fromIntegral pLeft) (3 + y + h - bndTextPadDown))
-        (w - fromIntegral bndPadRight - fromIntegral pLeft)
+        (V2 (1 + x) (3 + y + h - bndTextPadDown))
+        (w - fromIntegral bndPadRight)
         label
 
   fontBlur 0
-  withFillColor color $ return ()
+  fillColor color
   textBox
-    (V2 (x + fromIntegral pLeft) (y + h - bndTextPadDown))
-    (w - fromIntegral bndPadRight - fromIntegral pLeft)
+    (V2 x (2 + y + h - bndTextPadDown))
+    (w - fromIntegral bndPadRight)
     label
 
 

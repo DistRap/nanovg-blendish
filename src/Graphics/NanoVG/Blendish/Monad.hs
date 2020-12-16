@@ -7,12 +7,13 @@ import Data.Text (Text)
 
 import Graphics.NanoVG.Blendish.Context
 import Graphics.NanoVG.Blendish.Icon
+import Graphics.NanoVG.Blendish.Shorthand
 import Graphics.NanoVG.Blendish.Types
 import Graphics.NanoVG.Blendish.Theme
 import Graphics.NanoVG.Blendish.Utils
 import Graphics.NanoVG.Blendish.Monad.Combinators
 import Graphics.NanoVG.Blendish.Monad.Primitives
---import Graphics.NanoVG.Blendish.Monad.Wrappers
+import Graphics.NanoVG.Blendish.Monad.Wrappers
 
 import NanoVG (Color)
 import Linear (V2(V2))
@@ -254,3 +255,106 @@ menuBackground pos sz@(V2 w h) corners = do
   innerBox   pos (V2 w (h+1)) cf i1 i2
   outlineBox pos (V2 w (h+1)) cf (trans (wtOutline tMenu))
   dropShadow pos sz bndMenuRadius bndShadowFeather bndShadowAlpha
+
+nodeBackground
+  :: V2 Float
+  -> V2 Float
+  -> WidgetFocus
+  -> Maybe Icon
+  -> Text
+  -> Color
+  -> Bool
+  -> Draw ()
+nodeBackground pos@(V2 x y) sz@(V2 w h) focus mIcon title titleColor showArrow = do
+  Theme{..} <- theme
+  let cf = pure bndNodeRadius
+
+  innerBox
+    pos
+    (V2 w (bndNodeTitleHeight + 2))
+    (Corners bndNodeRadius bndNodeRadius 0 0)
+    (trans (offsetColor titleColor bndBevelShade))
+    (trans titleColor)
+
+  innerBox
+    (V2 x (y + bndNodeTitleHeight))
+    (V2 w (h + 2 - bndNodeTitleHeight))
+    (Corners 0 0 bndNodeRadius bndNodeRadius)
+    (trans (ntNodeBackdrop tNode))
+    (trans (ntNodeBackdrop tNode))
+
+  nodeIconLabel
+    tIcons
+    (V2 (x + bndNodeArrowAreaWidth) y)
+    (V2 (w - bndNodeArrowAreaWidth - bndNodeMarginSide) bndNodeTitleHeight)
+    mIcon
+    (wtText tRegular)
+    (offsetColor titleColor bndBevelShade)
+    ALeft
+    tFont
+    bndLabelFontSize
+    title
+
+  let (borderColor, arrowColor) = case focus of
+        NoFocus -> (black, offsetColor titleColor (-bndBevelShade))
+        HasFocus -> (ntSelected tNode, ntSelected tNode)
+        ActiveFocus -> (ntActiveNode tNode, ntSelected tNode)
+
+  outlineBox pos (V2 w (h + 1)) cf (trans borderColor)
+  when showArrow $
+    nodeArrowDown (V2 (x + bndNodeMarginSide) (y + bndNodeTitleHeight - 4)) bndNodeArrowSize arrowColor
+  dropShadow pos sz bndNodeRadius bndShadowFeather bndShadowAlpha
+
+coloredNodeWire
+  :: V2 Float
+  -> V2 Float
+  -> Color
+  -> Color
+  -> Draw ()
+coloredNodeWire pos1@(V2 x0 y0) pos2@(V2 x1 y1) color0 color1 = do
+  Theme{..} <- theme
+
+  let len = max (abs (x1 - x0)) (abs (y1 - y0))
+      delta = len * (ntNoodleCurving tNode / 10)
+      color = setAlpha
+                (ntWires tNode)
+                $ if getAlpha color0 < getAlpha color1
+                    then getAlpha color0
+                    else getAlpha color1
+
+      draw = do
+        moveTo pos1
+        bezierTo (V2 (x0 + delta) y0) (V2 (x1 - delta) y1) pos2
+
+  withStrokeColor color $ do
+    strokeWidth bndNodeWireOutlineWidth
+    draw
+
+  withStroke
+    (do
+      pain <- linearGradient (V2 x0 y1) (V2 x1 y1) color0 color1
+      strokePaint pain
+    )
+    (do
+      strokeWidth bndNodeWireWidth
+      draw
+    )
+
+  -- XXX: this is weird
+  -- reset stroke width
+  strokeWidth 1
+
+nodeWire
+  :: V2 Float
+  -> V2 Float
+  -> WidgetFocus
+  -> WidgetFocus
+  -> Draw ()
+nodeWire pos sz focus0 focus1 = do
+  nt <- tNode <$> theme
+  coloredNodeWire pos sz
+    (wireColor nt focus0)
+    (wireColor nt focus1)
+  where wireColor _nodeTheme NoFocus = rgbf1 0.5
+        wireColor nodeTheme HasFocus = ntWireSelect nodeTheme
+        wireColor nodeTheme ActiveFocus = ntActiveNode nodeTheme

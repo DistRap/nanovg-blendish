@@ -165,7 +165,7 @@ data NodeTheme = NodeTheme {
   , ntActiveNode    :: Color
   , ntWireSelect    :: Color
   , ntNodeBackdrop  :: Color
-  , ntNoodleCurving :: Int -- how much a noodle curves (0 to 10)
+  , ntNoodleCurving :: Float -- how much a noodle curves (0 to 10)
   }
 
 defaultNodeTheme :: NodeTheme
@@ -259,8 +259,10 @@ scrollHandleRect (V2 x y) (V2 w h) off' size' =
       in (V4 (x + (w - ws) * off) y ws h)
 
 
--- default text size
---bndLabelFontSize = 15
+-- default label text size
+-- (used by nodes)
+bndLabelFontSize :: Int
+bndLabelFontSize = 13
 
 -- default text padding in inner box
 bndPad :: Integer
@@ -363,6 +365,24 @@ bndNodeRadius = 8
 
 bndNodeTitleFeather :: Float
 bndNodeTitleFeather = 1
+
+bndNodePortRadius :: Float
+bndNodePortRadius = 5
+
+bndNodeMarginTop :: Float
+bndNodeMarginTop = 25
+
+bndNodeMarginDown :: Float
+bndNodeMarginDown = 5
+
+bndNodeMarginSide :: Float
+bndNodeMarginSide = 10
+
+bndNodeTitleHeight :: Float
+bndNodeTitleHeight = 20
+
+bndNodeArrowAreaWidth :: Float
+bndNodeArrowAreaWidth = 20
 
 bndNodeArrowSize :: Float
 bndNodeArrowSize = 9

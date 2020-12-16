@@ -22,6 +22,9 @@ opaq = flip setAlpha 0
 trans' :: Color -> Float -> Color
 trans' (Color r g b a) factor = Color r g b (a * (CFloat factor))
 
+getAlpha :: Color -> Float
+getAlpha (Color _r _g _b (CFloat a)) = a
+
 setAlpha :: Color -> Float -> Color
 setAlpha (Color r g b _a) a = Color r g b (CFloat a)
 

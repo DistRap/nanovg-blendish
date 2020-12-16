@@ -376,4 +376,24 @@ upDownArrow (V2 x y) s color = do
     lineTo (V2 (x + w) (y + 1))
   where w = s * 1.1
 
+nodeArrowDown
+  :: V2 Float
+  -> Float
+  -> Color
+  -> Draw ()
+nodeArrowDown pos@(V2 x y) size color = withFillColor color $ do
+  moveTo pos
+  lineTo (V2 (x + 0.5 * size) (y - size))
+  lineTo (V2 (x - 0.5 * size) (y - size))
 
+nodePort
+  :: V2 Float
+  -> WidgetFocus
+  -> Color
+  -> Draw ()
+nodePort pos focus color = do
+  Theme{..} <- theme
+  withStrokeColor (ntWires tNode) $ do
+    withFillColor (if focus == NoFocus then color else offsetColor color bndHoverShade) $ do
+      strokeWidth 1
+      circle pos bndNodePortRadius

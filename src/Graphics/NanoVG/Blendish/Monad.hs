@@ -2,7 +2,7 @@
 
 module Graphics.NanoVG.Blendish.Monad where
 
-import Control.Monad (when)
+import Control.Monad (when, forM_)
 import Data.Text (Text)
 
 import Graphics.NanoVG.Blendish.Context
@@ -358,3 +358,44 @@ nodeWire pos sz focus0 focus1 = do
   where wireColor _nodeTheme NoFocus = rgbf1 0.5
         wireColor nodeTheme HasFocus = ntWireSelect nodeTheme
         wireColor nodeTheme ActiveFocus = ntActiveNode nodeTheme
+
+-- | Draw triangles in top right and bottom left corners marking resizable area
+splitter
+  :: V2 Float
+  -> V2 Float
+  -> Draw ()
+splitter pos@(V2 x y) sz@(V2 w h) = do
+  Theme{..} <- theme
+  let insetLight = offsetColor tBg bndSplitterShade
+      insetDark = trans $ offsetColor tBg (-bndSplitterShade)
+      inset = trans tBg
+      (x2, y2) = ((x + w), (y + h))
+      _tops = [13, 9, 5]
+      _bots = [11, 7, 3]
+
+  withStrokeColor insetDark $ do
+    forM_ [13, 9, 5] $ \k -> do
+      moveTo (V2 x (y2 - k))
+      lineTo (V2 (x + k) y2)
+
+    forM_ [11, 7, 3] $ \k -> do
+      moveTo (V2 (x2 - k) y)
+      lineTo (V2 x2 (y + k))
+
+  withStrokeColor insetLight $ do
+    forM_ [11, 7, 3] $ \k -> do
+      moveTo (V2 x (y2 - k))
+      lineTo (V2 (x + k) y2)
+
+    forM_ [13, 9, 5] $ \k -> do
+      moveTo (V2 (x2 - k) y)
+      lineTo (V2 x2 (y + k))
+
+  withStrokeColor inset $ do
+    forM_ [12, 8, 4] $ \k -> do
+      moveTo (V2 x (y2 - k))
+      lineTo (V2 (x + k) y2)
+
+    forM_ [12, 8, 4] $ \k -> do
+      moveTo (V2 (x2 - k) y)
+      lineTo (V2 x2 (y + k))

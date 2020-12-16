@@ -35,6 +35,14 @@ arcTo :: V2 Float -> V2 Float -> Float -> Draw ()
 arcTo (V2 x y) (V2 j k) r = withCtx $ \c ->
   NanoVG.arcTo c (cvt x) (cvt y) (cvt j) (cvt k) (cvt r)
 
+bezierTo :: V2 Float -> V2 Float -> V2 Float -> Draw ()
+bezierTo (V2 c1x c1y) (V2 c2x c2y) (V2 x y) = withCtx $ \c ->
+  NanoVG.bezierTo c (cvt c1x) (cvt c1y) (cvt c2x) (cvt c2y) (cvt x) (cvt y)
+
+circle :: V2 Float -> Float -> Draw ()
+circle (V2 x y) r = withCtx $ \c ->
+  NanoVG.circle c (cvt x) (cvt y) (cvt r)
+
 rect :: V2 Float -> V2 Float -> Draw ()
 rect (V2 x y) (V2 w h) = withCtx $ \c ->
   NanoVG.rect c (cvt x) (cvt y) (cvt w) (cvt h)

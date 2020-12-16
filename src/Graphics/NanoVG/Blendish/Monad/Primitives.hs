@@ -365,15 +365,15 @@ arrow (V2 x y) s color = withFillColor color $ do
   closePath
 
 upDownArrow :: V2 Float -> Float -> Color -> Draw ()
-upDownArrow (V2 x y) s color = withFillColor color $ do
-  moveTo (V2 x (y - 1))
-  lineTo (V2 (x + 0.5 * w) (y - s - 1))
-  lineTo (V2 (x + w) (y - 1))
-  closePath
-  moveTo (V2 x (y + 1))
-  lineTo (V2 (x + 0.5 * w) (y + s + 1))
-  lineTo (V2 (x + w) (y + 1))
-  closePath
+upDownArrow (V2 x y) s color = do
+  withFillColor color $ do
+    moveTo (V2 x (y - 1))
+    lineTo (V2 (x + 0.5 * w) (y - s - 1))
+    lineTo (V2 (x + w) (y - 1))
+  withFillColor color $ do
+    moveTo (V2 x (y + 1))
+    lineTo (V2 (x + 0.5 * w) (y + s + 1))
+    lineTo (V2 (x + w) (y + 1))
   where w = s * 1.1
 
 

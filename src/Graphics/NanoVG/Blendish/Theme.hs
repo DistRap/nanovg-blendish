@@ -260,7 +260,7 @@ scrollHandleRect (V2 x y) (V2 w h) off' size' =
 
 
 -- default label text size
--- (used by nodes)
+-- (used by nodes and menu)
 bndLabelFontSize :: Int
 bndLabelFontSize = 13
 

@@ -1,5 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
+-- | Themed widgets
+
 module Graphics.NanoVG.Blendish.Monad where
 
 import Control.Monad (when, forM_)
@@ -17,7 +19,7 @@ import Graphics.NanoVG.Blendish.Monad.Wrappers
 
 import NanoVG (Color)
 import Linear (V2(V2))
--- Themed
+
 
 toolButton
   :: V2 Float
@@ -241,6 +243,17 @@ tooltipBackground pos sz@(V2 w h) = do
   outlineBox pos (V2 w (h+1)) cf (trans (wtOutline tToolTip))
   dropShadow pos sz bndMenuRadius bndShadowFeather bndShadowAlpha
 
+tooltip
+  :: V2 Float
+  -> V2 Float
+  -> Text
+  -> Draw ()
+tooltip pos@(V2 x y) sz@(V2 w h) txt = do
+  tooltipBackground pos sz
+  fillColor (trans white)
+  -- XXX: this fails if textBox breaks lines
+  textBox (V2 (x + fromIntegral bndPadRight)  (y + h - bndTextPadDown)) w txt
+
 menuBackground
   :: V2 Float
   -> V2 Float
@@ -451,3 +464,36 @@ menuItem pos sz mIcon focus labelText = do
     bndLabelFontSize
     (Just labelText)
     Nothing
+
+textField
+  :: V2 Float
+  -> V2 Float
+  -> Corners Bool
+  -> WidgetFocus
+  -> Maybe Icon
+  -> Text
+  -> Int -- ^ Caret start index
+  -> Int -- ^ Caret end index
+  -> Draw ()
+textField pos sz corners focus mIcon txt caretBegin caretEnd = do
+  let cf = selectCorners bndTextRadius corners
+
+  Theme{..} <- theme
+
+  bevelInset pos sz cf tBg
+  let (i1, i2) = innerColors focus tTextField False
+
+  innerBox   pos sz cf i1 i2
+  outlineBox pos sz cf (trans (wtOutline tTextField))
+
+  let tc = textColor focus tTextField
+      (V2 x y) = pos
+
+  case mIcon of
+    Nothing -> return ()
+    Just iconId -> icon tIcons (x + 4) (y + 2) iconId
+
+  let pLeft = 3 + maybe 0 (pure (bndIconSheetRes + 3)) mIcon
+      pos' = V2 (x + fromIntegral pLeft) y
+  labelCarret pos' sz tc tFontSize txt caretBegin caretEnd
+

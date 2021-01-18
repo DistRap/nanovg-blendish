@@ -102,7 +102,7 @@ choiceTheme = textColors
 textFieldTheme :: WidgetTheme
 textFieldTheme = shadeTopDown 0 25 $ shapeColors
   (rgbf 0.098 0.098 0.098)
-  (rgbf 0.353 0.353 0.353)
+  (rgbaf 0.353 0.353 0.353 0.5)
   (rgbf 0.6   0.6   0.6  )
   (rgbf 0.6   0.6   0.6  )
   def
@@ -322,7 +322,7 @@ bndOptionWidth = 14
 bndOptionHeight :: Float
 bndOptionHeight = 15
 
-bndTextRadius :: Integer
+bndTextRadius :: Float
 bndTextRadius = 4
 
 bndNumberRadius :: Float

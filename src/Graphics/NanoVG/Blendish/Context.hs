@@ -18,5 +18,8 @@ type Draw = ReaderT UIContext IO
 theme :: Draw Theme
 theme = ask >>= return . ctxTheme
 
+mouse :: Draw (Double, Double)
+mouse = ask >>= return . ctxMouse
+
 withCtx :: (Context -> IO a) -> Draw a
 withCtx op = ask >>= liftIO . op . ctxNvg

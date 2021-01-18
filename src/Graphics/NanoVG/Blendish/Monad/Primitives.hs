@@ -4,12 +4,17 @@
 
 module Graphics.NanoVG.Blendish.Monad.Primitives where
 
+import Control.Monad (when)
 import Data.Text (Text)
 import NanoVG (Color(..), Image)
+import Foreign.C.Types (CFloat(CFloat), CInt(CInt))
 
 import qualified NanoVG
+import qualified NanoVG.Internal.Text
+import qualified Data.IORef
 import qualified Data.Set
 import qualified Data.Text
+import qualified Data.Vector
 
 import Graphics.NanoVG.Blendish.Context
 import Graphics.NanoVG.Blendish.Icon
@@ -327,7 +332,7 @@ labelHeight
   -> Draw Float
 labelHeight mIconId label width' = do
   let h = bndWidgetHeight
-      width = width' - (bndTextRadius * 2) - (maybe bndIconSheetRes id mIconId)
+      width = width' - (round bndTextRadius * 2) - (maybe bndIconSheetRes id mIconId)
 
   Theme{..} <- theme
 
@@ -339,9 +344,132 @@ labelHeight mIconId label width' = do
   let bh = (b3 - b1) + bndTextPadDown
   return $ if bh > h then bh else h
 
--- XXX
-iconLabelCarret :: Draw ()
-iconLabelCarret = undefined
+labelCarret
+  :: V2 Float
+  -> V2 Float
+  -> Color -- ^ Text color
+  -> Int   -- ^ Font size
+  -> Text
+  -> Int   -- ^ Caret start
+  -> Int   -- ^ Caret end
+  -> Draw ()
+labelCarret pos@(V2 x y) sz@(V2 w h) textColor fontSize' txt caretStart caretEnd = do
+
+  fontSize $ fromIntegral fontSize'
+  textAlign $ Data.Set.fromList [NanoVG.AlignLeft, NanoVG.AlignBaseline]
+  fillColor textColor
+
+  Theme{..} <- theme
+  let caretColor = wtItem tTextField
+
+  withCtx $ \c -> do
+    counter <- Data.IORef.newIORef 0
+
+    NanoVG.save c
+    (_, CFloat desc, CFloat lineh) <- NanoVG.textMetrics c
+
+    -- what if textBreakLines function was a fold?
+    NanoVG.textBreakLines c txt (cvt w) 3 $ \row i -> do
+      let y' = y + fromIntegral i * lineh
+          textY = y' + lineh
+
+      -- text bounding boxes
+      when False $ do
+        NanoVG.beginPath c
+        NanoVG.strokeColor c red
+        NanoVG.rect c (cvt $ x - 1) (cvt $ y' - desc) (NanoVG.Internal.Text.width row) (cvt lineh)
+        NanoVG.stroke c
+
+      glyphs' <- NanoVG.textGlyphPositions c (cvt x) (cvt textY)
+        (NanoVG.Internal.Text.start row) (NanoVG.Internal.Text.end row)
+        100
+
+      cpos <- Data.IORef.readIORef counter
+      --print (cpos, length glyphs, (caretStart, caretEnd), (cpos >= caretStart, cpos <= caretEnd))
+      let
+        epos = cpos + length glyphs'
+        inCaretStart = caretStart >= cpos && caretStart <= epos
+        inCaretEnd = caretEnd >= cpos && caretEnd <= epos
+        glyphs = Data.Vector.cons (cvt x) (Data.Vector.map NanoVG.Internal.Text.glyphPosMaxX glyphs')
+
+      Data.IORef.writeIORef counter epos
+      --print (cpos, length glyphs, (inCaretStart, inCaretEnd))
+      --
+      let coloredRect color x' y' w' h' = do
+            NanoVG.fillColor c color
+            NanoVG.beginPath c
+            NanoVG.rect c x' y' w' h'
+            NanoVG.fill c
+
+      case (inCaretStart, inCaretEnd) of
+        -- single line
+        (True, True) -> case (caretStart == caretEnd) of
+          -- no selection
+          True -> do
+            let g  = glyphs Data.Vector.! (caretStart - cpos)
+            coloredRect (rgbaf 0.137 0.302 0.561 0.666) (g - 1.5) (cvt $ y' - desc) 2 (cvt $ lineh + 1)
+
+          -- single line selection
+          False -> do
+            let gl = glyphs Data.Vector.! (caretStart - cpos)
+                gr = glyphs Data.Vector.! (caretEnd - cpos)
+
+            coloredRect caretColor gl (cvt $ y' - desc) (gr - gl) (cvt $ lineh + 1)
+
+        -- selection starts on this line
+        (True, False) -> do
+          let gl = glyphs Data.Vector.! (caretStart - cpos)
+
+          coloredRect caretColor gl (cvt $ y' - desc) (NanoVG.Internal.Text.width row - (gl - cvt x)) (cvt $ lineh + 1)
+
+        -- selection ends on this line
+        (False, True) -> do
+          let gr = glyphs Data.Vector.! (caretEnd - cpos)
+
+          coloredRect caretColor (cvt x) (cvt $ y' - desc) (gr - cvt x) (cvt $ lineh + 1)
+
+        -- row in-between
+        (False, False) -> do
+          -- possibly selected
+          when (caretStart < cpos && caretEnd > epos) $ do
+            coloredRect caretColor (cvt $ x - 1) (cvt $ y' - desc) (NanoVG.Internal.Text.width row) (cvt lineh)
+
+      -- draw text itself
+      NanoVG.fillColor c textColor
+      NanoVG.Internal.Text.text c (cvt x) (cvt textY)
+        (NanoVG.Internal.Text.start row) (NanoVG.Internal.Text.end row)
+
+-- | Get carret position based on cursor position
+--
+-- Algorithm from https://github.com/cocreature/nanovg-hs/blob/master/example/Example.hs#L247
+caretP pos@(V2 x y) sz@(V2 w h) txt = do
+  (mx', my') <- mouse
+  let mx = fromIntegral $ round mx'
+  let my = fromIntegral $ round my'
+  withCtx $ \c -> do
+    counter <- Data.IORef.newIORef 0
+
+    (_, desc, lineh) <- NanoVG.textMetrics c
+
+    -- what if textBreakLines function was a fold?
+    NanoVG.textBreakLines c txt w 3 $ \row i -> do
+       let y' = y + fromIntegral i * lineh
+           hit = mx > x && mx < (x+w) && my >= y' && my < (y' + lineh)
+
+       when hit $ do
+         let caretxInit = if mx < x+ (NanoVG.Internal.Text.width row) / 2 then x else x + NanoVG.Internal.Text.width row
+             ps = x
+         glyphs <- NanoVG.textGlyphPositions c x y (NanoVG.Internal.Text.start row) (NanoVG.Internal.Text.end row) 100
+         let leftBorders = Data.Vector.map NanoVG.Internal.Text.glyphX glyphs
+             rightBorders = Data.Vector.snoc (Data.Vector.drop 1 leftBorders) (x + NanoVG.Internal.Text.width row)
+             rightPoints = Data.Vector.zipWith (\x y -> 0.3*x+0.7*y) leftBorders rightBorders
+             leftPoints = Data.Vector.cons x (Data.Vector.take (Data.Vector.length glyphs - 1) rightPoints)
+             caretx = maybe caretxInit (NanoVG.Internal.Text.glyphX . (glyphs Data.Vector.!))
+               $ Data.Vector.findIndex (\(px,gx) -> mx >= px && mx < gx) $ Data.Vector.zip leftPoints rightPoints
+         NanoVG.beginPath c
+         NanoVG.fillColor c (rgba 255 192 0 255)
+         NanoVG.rect c caretx (y' - desc) 1 lineh
+         NanoVG.fill c
 
 -- | Check mark
 check :: V2 Float -> Color -> Draw ()

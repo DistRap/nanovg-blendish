@@ -46,6 +46,7 @@ library
                      , nanovg
                      , containers
                      , linear
+                     , vector
   default-language:    Haskell2010
   ghc-options:         -Wall -Wunused-packages
   c-sources:           cbits/glew.c

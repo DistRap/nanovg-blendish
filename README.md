@@ -1,23 +1,6 @@
-# haskell-template
+# nanovg-blendish
 
-Encode and decode [Something](https://example.org)
+Port of [oui-blendish](https://hg.sr.ht/~duangle/oui-blendish)
+using [nanovg-hs](https://github.com/cocreature/nanovg-hs).
 
-Copy and use `./new PROJNAME` to rename stuff.
-
-[Relative link](app/Main.hs).
-
-## Section
-
-* Bullet
-* list
-
-## Usage
-
-```haskell
-import qualified Data.Lib as C
-
-main :: IO ()
-main = do
-  let x = (0, AnalogIn 4.48)
-  print $ C.decode $ C.encode x
-```
+[![Preview](./shot2.png)](https://raw.githubusercontent.com/distrap/nanovg-blendish/master/shot2.png)

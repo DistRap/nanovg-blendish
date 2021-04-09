@@ -54,7 +54,8 @@ foreign import ccall unsafe "initGlew"
 main :: IO ()
 main = do
     win <- initWindow "nanovg-blendish" 1920 1080
-    c@(NanoVG.Context _c') <- NanoVG.createGL3 (S.fromList [Antialias,StencilStrokes,Debug])
+    --c@(NanoVG.Context _c') <- NanoVG.createGL3 (S.fromList [Antialias,StencilStrokes,Debug])
+    c@(NanoVG.Context _c') <- NanoVG.createGL3 (S.fromList [StencilStrokes,Debug])
 
     mdata <- runMaybeT $ loadData c
     da <- case mdata of
@@ -380,7 +381,7 @@ initWindow title width height = do
       , WindowHint'ContextVersionMinor 3
       , WindowHint'OpenGLProfile OpenGLProfile'Core
       , WindowHint'OpenGLForwardCompat True
-      -- , WindowHint'Samples $ Just 16 -- MSAA 16
+      , WindowHint'Samples $ Just 4 -- MSAA 4
       , WindowHint'Resizable True
       , WindowHint'Decorated False
       , WindowHint'DoubleBuffer True

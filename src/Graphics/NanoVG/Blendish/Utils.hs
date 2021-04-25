@@ -42,3 +42,8 @@ rgbf1 x = rgbf x x x
 
 rgbaf1 :: Float -> Float -> Color
 rgbaf1 x = rgbaf x x x
+
+-- 0 0 -> A1 (topleft)
+-- 1 0 -> A2 (topleft -> this)
+iconIdFromXY :: Integer -> Integer -> Integer
+iconIdFromXY x y = x + y `Data.Bits.shiftL` 8

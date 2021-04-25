@@ -10,7 +10,6 @@ import qualified Graphics.UI.GLFW as GLFW
 
 import Data.Bits ((.|.))
 -- 2D
-import qualified Data.Bits
 import qualified Data.Set as S
 import qualified Data.List
 
@@ -125,10 +124,6 @@ defRS x y mb = RS False False False False (round x, round y) mb []
 --  (GLFW.MouseButton'1) -- ,MouseButtonState'Pressed) -- ,ModifierKeys {modifierKeysShift = False, modifierKeysControl = False, modifierKeysAlt = False, modifierKeysSuper = False, modifierKeysCapsLock = False, modifierKeysNumLock = True})
 --  ] []
 
--- 0 0 -> A1 (topleft)
--- 1 0 -> A2 (topleft -> this)
-iconIdFromXY :: Integer -> Integer -> Integer
-iconIdFromXY x y = x + y `Data.Bits.shiftL` 8
 
 data Size = Fixed | Greedy
   deriving (Eq, Show, Ord)

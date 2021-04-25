@@ -5,31 +5,23 @@
 
 module Graphics.NanoVG.Blendish where
 
-import Graphics.UI.GLFW (WindowHint(..), OpenGLProfile(..), Key(..), MouseButton(..))
-import qualified Graphics.UI.GLFW as GLFW
-
 import Data.Bits ((.|.))
--- 2D
-import qualified Data.Set as S
-import qualified Data.List
-
-
+import Graphics.UI.GLFW (WindowHint(..), OpenGLProfile(..), Key(..), MouseButton(..))
 import NanoVG (Font, CreateFlags(..))
+
+import qualified Data.Set
+import qualified Graphics.UI.GLFW as GLFW
 import qualified NanoVG
+
+
 import           Foreign.C.Types
 
-import Data.Text (Text)
 import qualified Data.Text
 
--- loadDat
 import           Control.Monad
 import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Reader
-import           Control.Monad.Trans.State
 import           Control.Monad.Trans.Maybe
-
-import Control.Concurrent.STM hiding (check)-- .TVar 
 
 -- ours
 import Graphics.NanoVG.Blendish.Icon
@@ -42,7 +34,6 @@ import Graphics.NanoVG.Blendish.Utils
 import Paths_nanovg_blendish
 
 import Graphics.GL.Core33
-import Linear
 
 foreign import ccall unsafe "initGlew"
   glewInit :: IO CInt
@@ -50,8 +41,8 @@ foreign import ccall unsafe "initGlew"
 main :: IO ()
 main = do
     win <- initWindow "nanovg-blendish" 1920 1080
-    --c@(NanoVG.Context _c') <- NanoVG.createGL3 (S.fromList [Antialias,StencilStrokes,Debug])
-    c@(NanoVG.Context _c') <- NanoVG.createGL3 (S.fromList [StencilStrokes,Debug])
+    --c@(NanoVG.Context _c') <- NanoVG.createGL3 (Data.Set.fromList [Antialias,StencilStrokes,Debug])
+    c@(NanoVG.Context _c') <- NanoVG.createGL3 (Data.Set.fromList [StencilStrokes,Debug])
 
     mdata <- runMaybeT $ loadData c
     da <- case mdata of

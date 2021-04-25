@@ -46,6 +46,7 @@ library
                      , gl
                      , nanovg
                      , containers
+                     , data-default
                      , linear
                      , vector
   default-language:    Haskell2010

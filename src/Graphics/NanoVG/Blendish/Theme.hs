@@ -10,6 +10,7 @@ import Graphics.NanoVG.Blendish.Types (WidgetFocus(..))
 import Graphics.NanoVG.Blendish.Shorthand
 import Graphics.NanoVG.Blendish.Utils
 import Linear
+import Data.Default
 
 import qualified NanoVG
 
@@ -24,15 +25,16 @@ data WidgetTheme = WidgetTheme {
   , wtShadeDown     :: Float -- ^ Delta modifier for lower part of gradient (-100 to 100)
   }
 
-def :: WidgetTheme
-def = WidgetTheme
-  (NanoVG.rgbf 0.098 0.098 0.098)
-  (NanoVG.rgbf 0.098 0.098 0.098)
-  (NanoVG.rgbf 0.6   0.6   0.6  )
-  (NanoVG.rgbf 0.392 0.392 0.392)
-  bndColorText
-  bndColorTextSelected
-  0 0
+instance Default WidgetTheme where
+  def = WidgetTheme
+    (NanoVG.rgbf 0.098 0.098 0.098)
+    (NanoVG.rgbf 0.098 0.098 0.098)
+    (NanoVG.rgbf 0.6   0.6   0.6  )
+    (NanoVG.rgbf 0.392 0.392 0.392)
+    bndColorText
+    bndColorTextSelected
+    0
+    0
 
 bndColorText :: Color
 bndColorText =  black
@@ -219,13 +221,16 @@ defTheme iconz = Theme
   13
 
 innerColors :: WidgetFocus -> WidgetTheme -> Bool -> (Color, Color)
-innerColors NoFocus wt@WidgetTheme{..} _ = offsetColorTopDown wtInner wt
-innerColors HasFocus wt@WidgetTheme{..} _ = offsetColorTopDown (offsetColor wtInner bndHoverShade) wt
-innerColors ActiveFocus wt@WidgetTheme{..} flipped =
-  case flipped of
-    False -> offsetColorTopDown wtInnerSelected wt
-    True -> offsetColorTopDown wtInnerSelected $ -- flipped top/down
-      wt { wtShadeTop = wtShadeDown, wtShadeDown = wtShadeTop }
+innerColors NoFocus wt@WidgetTheme{..} _ =
+  offsetColorTopDown wtInner wt
+innerColors HasFocus wt@WidgetTheme{..} _ =
+  offsetColorTopDown (offsetColor wtInner bndHoverShade) wt
+innerColors ActiveFocus wt@WidgetTheme{..} True =
+  offsetColorTopDown wtInnerSelected
+    -- flipped top/down
+    wt { wtShadeTop = wtShadeDown, wtShadeDown = wtShadeTop }
+innerColors ActiveFocus wt@WidgetTheme{..} False =
+  offsetColorTopDown wtInnerSelected wt
 
 textColor :: WidgetFocus -> WidgetTheme -> Color
 textColor ActiveFocus WidgetTheme{..} = wtTextSelected

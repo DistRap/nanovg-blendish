@@ -26,6 +26,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Graphics.NanoVG.Blendish
                      , Graphics.NanoVG.Blendish.Context
+                     , Graphics.NanoVG.Blendish.Demo
                      , Graphics.NanoVG.Blendish.Icon
                      , Graphics.NanoVG.Blendish.IconModuleGenerator
                      , Graphics.NanoVG.Blendish.Monad

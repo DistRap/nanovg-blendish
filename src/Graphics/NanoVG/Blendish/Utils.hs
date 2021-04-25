@@ -4,6 +4,7 @@ module Graphics.NanoVG.Blendish.Utils where
 import NanoVG (Color(..))
 import Foreign.C.Types (CFloat(..))
 import qualified NanoVG
+import qualified Data.Bits
 
 offsetColor :: Color -> Float -> Color
 offsetColor (Color (CFloat r) (CFloat g) (CFloat b) a) delta = Color (CFloat $ r + by) (CFloat $ g + by) (CFloat $ b + by) a

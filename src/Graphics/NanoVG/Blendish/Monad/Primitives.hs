@@ -455,7 +455,7 @@ caretP
   -> Text
   -> Draw ()
 caretP (V2 x y) (V2 w _h) txt = do
-  (mx', my') <- mouse
+  (V2 mx' my') <- mouse
   -- TODO weird
   let mx :: CFloat
       mx = (fromIntegral :: Integer -> CFloat) $ round mx'

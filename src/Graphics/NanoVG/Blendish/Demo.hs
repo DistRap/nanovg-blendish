@@ -12,9 +12,10 @@ import Graphics.NanoVG.Blendish.Types
 import Graphics.NanoVG.Blendish.Utils
 
 import Linear
+import qualified Data.Text
 
-demoUI :: Draw ()
-demoUI = do
+demoUI :: (Int, Int) -> Draw ()
+demoUI (fbW, fbH) = do
   let sp = bndWidgetHeight + 5
   Theme{..} <- theme
   background (V2 0 0) (V2 600 600) tBg
@@ -73,11 +74,6 @@ demoUI = do
   --tooltipBackground (V2 10 150) (V2 60 60)
   tooltip (V2 10 150) (V2 120 20) "This is a tooltip"
 
-  menuBackground (V2 260 230) (V2 120 100) (pure True)
-  menuLabel (V2 260 230) (V2 150 bndWidgetHeight) (Just Icon'MenuPanel) "Menu label"
-  menuItem (V2 260 (bndWidgetHeight - 2 + 230)) (V2 120 bndWidgetHeight) (Just Icon'Blender) NoFocus "Menu item"
-  menuItem (V2 260 (2*(bndWidgetHeight - 2) + 230)) (V2 120 bndWidgetHeight) (Just Icon'Trash) HasFocus "Focused"
-  menuItem (V2 260 (3*(bndWidgetHeight - 2) + 230)) (V2 120 bndWidgetHeight) (Just Icon'Options) ActiveFocus "Active"
 
   --coloredNodeWire (V2 160 460) (V2 200 440) red green
   nodeWire (V2 160 460) (V2 200 440) NoFocus ActiveFocus
@@ -104,6 +100,21 @@ demoUI = do
 
   numberField (V2 20 (480 + (0*sp))) (V2 120 bndWidgetHeight)
     (pure True) HasFocus "Round" "10"
+
+  -- framebuffer size
+  numberField (V2 320 (10 + (12*sp))) (V2 200 bndWidgetHeight)
+    (pure True) HasFocus "Width" (tshow fbW)
+
+  numberField (V2 320 (10 + (13*sp))) (V2 200 bndWidgetHeight)
+    (pure True) HasFocus "Height" (tshow fbH)
+
+  -- Menu
+  menuBackground (V2 260 230) (V2 120 100) (pure True)
+  menuLabel (V2 260 230) (V2 150 bndWidgetHeight) (Just Icon'MenuPanel) "Menu label"
+  menuItem (V2 260 (bndWidgetHeight - 2 + 230)) (V2 120 bndWidgetHeight) (Just Icon'Blender) NoFocus "Menu item"
+  menuItem (V2 260 (2*(bndWidgetHeight - 2) + 230)) (V2 120 bndWidgetHeight) (Just Icon'Trash) HasFocus "Focused"
+  menuItem (V2 260 (3*(bndWidgetHeight - 2) + 230)) (V2 120 bndWidgetHeight) (Just Icon'Options) ActiveFocus "Active"
+
 
   label (V2 90 460) (V2 100 10) Nothing "Out"
   nodePort (V2 160 460) HasFocus (rgbf1 0.5)
@@ -141,3 +152,6 @@ demoUI = do
   textField (V2 420 (010 + (5 *sp))) (V2 100 bndWidgetHeight) (pure True) NoFocus (Just Icon'GhostEnabled)
     "Foxy owl"
     0 8
+
+  where
+    tshow = Data.Text.pack . show

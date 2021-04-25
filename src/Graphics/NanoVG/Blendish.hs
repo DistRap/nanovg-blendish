@@ -6,21 +6,20 @@
 module Graphics.NanoVG.Blendish where
 
 import Data.Bits ((.|.))
-import Graphics.UI.GLFW (WindowHint(..), OpenGLProfile(..), Key(..), MouseButton(..))
-import NanoVG (Font, CreateFlags(..))
+import Graphics.UI.GLFW (Window, WindowHint(..), OpenGLProfile(..), Key(..), MouseButton(..))
+import Linear (V2(..))
+import NanoVG (Font, CreateFlags(..), Context, Image)
 
+import qualified Data.Bool
 import qualified Data.Set
 import qualified Graphics.UI.GLFW as GLFW
 import qualified NanoVG
-
+import qualified Data.Text
 
 import           Foreign.C.Types
 
-import qualified Data.Text
-
 import           Control.Monad
 import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Reader
 import           Control.Monad.Trans.Maybe
 
 -- ours
@@ -38,40 +37,96 @@ import Graphics.GL.Core33
 foreign import ccall unsafe "initGlew"
   glewInit :: IO CInt
 
-main :: IO ()
-main = do
-    win <- initWindow "nanovg-blendish" 1920 1080
-    --c@(NanoVG.Context _c') <- NanoVG.createGL3 (Data.Set.fromList [Antialias,StencilStrokes,Debug])
-    c@(NanoVG.Context _c') <- NanoVG.createGL3 (Data.Set.fromList [StencilStrokes,Debug])
+data BlendishConfig = BlendishConfig {
+    configNanovgAntialias :: Bool
+  , configNanovgDebug :: Bool
+  , configFontSize :: Int
+  } deriving Show
 
-    mdata <- runMaybeT $ loadData c
-    da <- case mdata of
+-- TODO: data-def
+def = BlendishConfig {
+    configNanovgAntialias = False
+  , configNanovgDebug = False
+  , configFontSize = 08
+  }
+
+data UIData = UIData {
+    uiDataSansFont :: Font
+  , uiDataIcons :: Image
+  }
+
+blendishCfg
+  :: BlendishConfig
+  -> Window
+  -> (a -> Draw ())
+  -> IO (a -> IO ())
+blendishCfg BlendishConfig{..} win drawAct = do
+    nanovgContext<- NanoVG.createGL3
+      $ Data.Set.fromList
+      $ [StencilStrokes]
+        ++ Data.Bool.bool [] (pure Antialias) configNanovgAntialias
+        ++ Data.Bool.bool [] (pure Debug) configNanovgDebug
+
+    NanoVG.fontSize nanovgContext (fromIntegral configFontSize)
+    NanoVG.fontFace nanovgContext "sans"
+    NanoVG.globalAlpha nanovgContext 1
+
+    mdata <- runMaybeT $ loadData nanovgContext
+    uiData <- case mdata of
       Nothing -> error "Unable to load data"
       Just x -> return x
 
+    let renderAct = \drawData -> do
+          render nanovgContext (drawAct drawData) uiData win
+    return renderAct
+
+blendish
+  :: Window
+  -> (a -> Draw ())
+  -> IO (a -> IO ())
+blendish = blendishCfg def
+
+render
+  :: Context
+  -> Draw ()
+  -> UIData
+  -> Window
+  -> IO ()
+render nanovgCtx drawAct uiData win = do
+
+  (winW, winH) <- GLFW.getWindowSize win
+  (mx, my) <- GLFW.getCursorPos win
+  (fbW, _fbH) <- GLFW.getFramebufferSize win
+  let pxRatio = fromIntegral fbW / fromIntegral winW
+
+  NanoVG.beginFrame nanovgCtx (fromIntegral winW) (fromIntegral winH) (pxRatio * 1.0)
+
+  runDraw
+    (DrawContext
+      nanovgCtx
+      (defTheme (uiDataIcons uiData))
+      (V2 mx my))
+    drawAct
+
+  NanoVG.endFrame nanovgCtx
+
+main :: IO ()
+main = do
+    win <- initWindow "nanovg-blendish" 1920 1080
+
+    renderUI <- blendish win demoUI
+
     let loop = do
                 -- update graphics input
-                (winW,winH) <- GLFW.getWindowSize win >>= \(w,h) -> do
-                  return (w, h)
+                fbSize@(fbW, fbH) <- GLFW.getFramebufferSize win
 
-                Just _t <- GLFW.getTime
-                (mx, my) <- GLFW.getCursorPos win
-                (fbW, fbH) <- GLFW.getFramebufferSize win
-                let pxRatio = fromIntegral fbW / fromIntegral winW
-
-                -- NANO
                 glViewport 0 0 (fromIntegral fbW) (fromIntegral fbH)
                 glClearColor 0.3 0.3 0.32 1.0
+                -- at least GL_DEPTH_BUFFER_BIT and GL_STENCIL_BUFFER_BIT are required
                 glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
 
-                mb1 <- GLFW.getMouseButton win MouseButton'1
-                let mb = case mb1 of
-                            GLFW.MouseButtonState'Pressed -> [ MouseButton'1 ]
-                            _ -> []
-
-                NanoVG.beginFrame c (fromIntegral winW) (fromIntegral winH) (pxRatio * 1.0)
-                renderUI c da mx my mb
-                NanoVG.endFrame c
+                -- call the rendering function with fbsize input
+                renderUI fbSize
 
                 GLFW.swapBuffers win
                 GLFW.pollEvents
@@ -85,29 +140,6 @@ main = do
     loop
     GLFW.destroyWindow win
     GLFW.terminate
-
-
-data UIData = UIData Font NanoVG.Image
-
-loadData :: NanoVG.Context -> MaybeT IO UIData
-loadData c = do
-  (fontFile, iconsFile) <- liftIO $
-    (,) <$> getDataFileName "DejaVuSans.ttf"
-        <*> getDataFileName "blender_icons16.png"
-  sans  <- MaybeT $ NanoVG.createFont c "sans" (NanoVG.FileName $ Data.Text.pack fontFile)
-  icons <- MaybeT $ NanoVG.createImage c (NanoVG.FileName $ Data.Text.pack iconsFile) 0
-  pure (UIData sans icons)
-
-renderUI :: NanoVG.Context -> UIData -> Double -> Double -> [MouseButton] -> IO ()
-renderUI ctx (UIData _ icons) x y _mouseButtons = do
-  NanoVG.fontSize ctx 18
-  NanoVG.fontFace ctx "sans"
-
-  NanoVG.globalAlpha ctx 1
-
-  _w <- flip runReaderT (UIContext ctx (defTheme icons) (x, y)) $ do
-    demoUI
-  return ()
 
 initWindow :: String -> Int -> Int -> IO GLFW.Window
 initWindow title width height = do
@@ -133,3 +165,18 @@ initWindow title width height = do
         GLFW.makeContextCurrent $ Just win
         void glewInit
         return win
+
+-- | Load default data files bundled with nanovg-blendish
+loadData
+  :: Context
+  -> MaybeT IO UIData
+loadData c = do
+  (fontFile, iconsFile) <- liftIO $
+    (,) <$> getDataFileName "DejaVuSans.ttf"
+        <*> getDataFileName "blender_icons16.png"
+  sans  <- MaybeT $ NanoVG.createFont c "sans" (NanoVG.FileName $ Data.Text.pack fontFile)
+  icons <- MaybeT $ NanoVG.createImage c (NanoVG.FileName $ Data.Text.pack iconsFile) 0
+  pure $ UIData {
+            uiDataSansFont = sans
+          , uiDataIcons = icons
+          }

@@ -8,6 +8,9 @@ module Graphics.NanoVG.Blendish (
   , blendishCfg
   , BlendishConfig(..)
   , main
+  , simple
+  , initWindow
+  , loadData
   , module Graphics.NanoVG.Blendish.Icon
   , module Graphics.NanoVG.Blendish.Context
   , module Graphics.NanoVG.Blendish.Types
@@ -67,6 +70,16 @@ data UIData = UIData {
   , uiDataIcons :: Image
   }
 
+-- | Initialize blendish (and its NanoVG context), wrapping
+-- our `a -> Draw ()` function into `a -> IO ()` variant
+-- which is then called from application main loop.
+blendish
+  :: Window
+  -> (a -> Draw ())
+  -> IO (a -> IO ())
+blendish = blendishCfg def
+
+-- | Principled variant of @blendish@, accepting @BlendishConfig@
 blendishCfg
   :: BlendishConfig
   -> Window
@@ -92,12 +105,8 @@ blendishCfg BlendishConfig{..} win drawAct = do
           render nanovgContext (drawAct drawData) uiData win
     return renderAct
 
-blendish
-  :: Window
-  -> (a -> Draw ())
-  -> IO (a -> IO ())
-blendish = blendishCfg def
 
+-- | Actual rendering function
 render
   :: Context
   -> Draw ()
@@ -122,6 +131,7 @@ render nanovgCtx drawAct uiData win = do
 
   NanoVG.endFrame nanovgCtx
 
+-- | Demo rendering example
 main :: IO ()
 main = do
     win <- initWindow "nanovg-blendish" 1920 1080
@@ -154,6 +164,7 @@ main = do
     GLFW.destroyWindow win
     GLFW.terminate
 
+-- | Init GLFW Window and enable glew
 initWindow :: String -> Int -> Int -> IO GLFW.Window
 initWindow title width height = do
     void GLFW.init
@@ -197,3 +208,35 @@ loadData c = do
             uiDataSansFont = sans
           , uiDataIcons = icons
           }
+
+-- | Render @Draw ()@, shorthand for GHCI testing
+-- > simple $ toolButton (V2 100 100) (V2 200 bndWidgetHeight) (pure True) HasFocus (Just Icon'Speaker) (Just "Simple")
+simple :: Draw () -> IO ()
+simple drawAct = do
+    win <- initWindow "nanovg-blendish-simple" 1920 1080
+
+    -- init blendish
+    renderUI <- blendish win (const drawAct)
+
+    let loop = do
+                (fbW, fbH) <- GLFW.getFramebufferSize win
+                glViewport 0 0 (fromIntegral fbW) (fromIntegral fbH)
+                glClearColor 0.3 0.3 0.32 1.0
+                -- at least GL_DEPTH_BUFFER_BIT and GL_STENCIL_BUFFER_BIT are required
+                glClear (GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT .|. GL_STENCIL_BUFFER_BIT)
+
+                -- call the rendering function with fbsize input
+                renderUI ()
+
+                GLFW.swapBuffers win
+                GLFW.pollEvents
+
+                let keyIsPressed k = (==GLFW.KeyState'Pressed) <$> GLFW.getKey win k
+                escape <- keyIsPressed GLFW.Key'Escape
+                q <- keyIsPressed Key'Q
+                shouldClose <- GLFW.windowShouldClose win
+                unless (escape || q || shouldClose) loop
+
+    loop
+    GLFW.destroyWindow win
+    GLFW.terminate

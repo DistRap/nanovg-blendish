@@ -22,7 +22,7 @@ instance Applicative Corners where
   Corners a b c d <*> Corners e f g h = Corners (a e) (b f) (c g) (d h)
 
 selectCorners :: Float -> Corners Bool -> Corners Float
-selectCorners r cs = fmap (\x -> if x then r else 0) cs
+selectCorners r = fmap (\x -> if x then r else 0)
 
 downCorners :: Corners a -> (a, a)
 downCorners c = (downRight c, downLeft c)

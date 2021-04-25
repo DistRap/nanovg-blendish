@@ -20,7 +20,7 @@ opaq :: Color -> Color
 opaq = flip setAlpha 0
 
 trans' :: Color -> Float -> Color
-trans' (Color r g b a) factor = Color r g b (a * (CFloat factor))
+trans' (Color r g b a) factor = Color r g b (a * CFloat factor)
 
 getAlpha :: Color -> Float
 getAlpha (Color _r _g _b (CFloat a)) = a
@@ -41,4 +41,4 @@ rgbf1 :: Float -> Color
 rgbf1 x = rgbf x x x
 
 rgbaf1 :: Float -> Float -> Color
-rgbaf1 x a = rgbaf x x x a
+rgbaf1 x = rgbaf x x x

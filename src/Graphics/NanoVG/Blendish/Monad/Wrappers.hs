@@ -131,8 +131,8 @@ cvtBounds (NanoVG.Bounds (NanoVG.V4 (CFloat x0) (CFloat y0) (CFloat x1) (CFloat 
 
 textBounds :: Float -> Float -> Text -> Draw (V4 Float)
 textBounds a b t = withCtx $ \c ->
-  NanoVG.textBounds c (cvt a) (cvt b) t >>= return . cvtBounds
+  cvtBounds <$> NanoVG.textBounds c (cvt a) (cvt b) t
 
 textBoxBounds :: Float -> Float -> Float -> Text -> Draw (V4 Float)
 textBoxBounds a b w t = withCtx $ \c ->
-  NanoVG.textBoxBounds c (cvt a) (cvt b) (cvt w) t >>= return . cvtBounds
+  cvtBounds <$> NanoVG.textBoxBounds c (cvt a) (cvt b) (cvt w) t

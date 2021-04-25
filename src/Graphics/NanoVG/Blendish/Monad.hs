@@ -221,8 +221,8 @@ scrollbar pos@(V2 x y) sz@(V2 w h) focus offset size = do
         let cSize = clamp size 0 1
             cOffset = clamp offset 0 1
         in
-        if h > w then let hs = max (cSize * h) (w + 1) in ((V2 x (y + (h-hs)*cOffset)), (V2 w hs))
-                 else let ws = max (cSize * w) (h - 1) in ((V2 (x + (w-ws)*cOffset) y), (V2 ws h))
+        if h > w then let hs = max (cSize * h) (w + 1) in (V2 x (y + (h-hs)*cOffset), V2 w hs)
+                 else let ws = max (cSize * w) (h - 1) in (V2 (x + (w-ws)*cOffset) y, V2 ws h)
 
   innerBox handlePos handleSize (pure bndScrollBarRadius)
     (offsetColor itemColor (3 * wtShadeDown tScrollBar))
@@ -377,13 +377,15 @@ splitter
   :: V2 Float
   -> V2 Float
   -> Draw ()
-splitter pos@(V2 x y) sz@(V2 w h) = do
+splitter (V2 x y) (V2 w h) = do
   Theme{..} <- theme
   let insetLight = offsetColor tBg bndSplitterShade
       insetDark = trans $ offsetColor tBg (-bndSplitterShade)
       inset = trans tBg
-      (x2, y2) = ((x + w), (y + h))
+      (x2, y2) = (x + w, y + h)
+      _tops :: [Int]
       _tops = [13, 9, 5]
+      _bots :: [Int]
       _bots = [11, 7, 3]
 
   withStrokeColor insetDark $ do

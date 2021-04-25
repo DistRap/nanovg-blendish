@@ -8,7 +8,6 @@ module Graphics.NanoVG.Blendish where
 import Graphics.UI.GLFW (WindowHint(..), OpenGLProfile(..), Key(..), MouseButton(..))
 import qualified Graphics.UI.GLFW as GLFW
 
-import Data.Function ((&))
 import Data.Bits ((.|.))
 -- 2D
 import qualified Data.Bits
@@ -35,11 +34,9 @@ import Control.Concurrent.STM hiding (check)-- .TVar
 
 -- ours
 import Graphics.NanoVG.Blendish.Icon
---import Graphics.NanoVG.Blendish.IconModuleGenerator
 import Graphics.NanoVG.Blendish.Context
 import Graphics.NanoVG.Blendish.Monad
 import Graphics.NanoVG.Blendish.Monad.Primitives
-import Graphics.NanoVG.Blendish.Shorthand
 import Graphics.NanoVG.Blendish.Types
 import Graphics.NanoVG.Blendish.Theme
 import Graphics.NanoVG.Blendish.Utils
@@ -89,11 +86,11 @@ main = do
                 GLFW.swapBuffers win
                 GLFW.pollEvents
 
-                let keyIsPressed k = fmap (==GLFW.KeyState'Pressed) $ GLFW.getKey win k
+                let keyIsPressed k = (==GLFW.KeyState'Pressed) <$> GLFW.getKey win k
                 escape <- keyIsPressed GLFW.Key'Escape
                 q <- keyIsPressed Key'Q
                 shouldClose <- GLFW.windowShouldClose win
-                if (escape || q || shouldClose) then return () else loop
+                unless (escape || q || shouldClose) loop
 
     loop
     GLFW.destroyWindow win
@@ -112,7 +109,7 @@ loadData c = do
   pure (UIData sans icons)
 
 renderUI :: NanoVG.Context -> UIData -> Double -> Double -> [MouseButton] -> IO ()
-renderUI ctx (UIData _ icons) x y mb = do
+renderUI ctx (UIData _ icons) x y _mouseButtons = do
   NanoVG.fontSize ctx 18
   NanoVG.fontFace ctx "sans"
 
@@ -234,15 +231,15 @@ renderUI ctx (UIData _ icons) x y mb = do
       "Lazy cat"
       5 5
 
-    textField (V2 420 (010 + (3 *sp))) (V2 100 (bndWidgetHeight)) (pure True) NoFocus Nothing
+    textField (V2 420 (010 + (3 *sp))) (V2 100 bndWidgetHeight) (pure True) NoFocus Nothing
       "Lazy dog"
       8 8
 
-    textField (V2 420 (010 + (4 *sp))) (V2 100 (bndWidgetHeight)) (pure True) NoFocus Nothing
+    textField (V2 420 (010 + (4 *sp))) (V2 100 bndWidgetHeight) (pure True) NoFocus Nothing
       "Foxy cat"
       1 7
 
-    textField (V2 420 (010 + (5 *sp))) (V2 100 (bndWidgetHeight)) (pure True) NoFocus (Just Icon'GhostEnabled)
+    textField (V2 420 (010 + (5 *sp))) (V2 100 bndWidgetHeight) (pure True) NoFocus (Just Icon'GhostEnabled)
       "Foxy owl"
       0 8
 
@@ -292,7 +289,7 @@ value :: a -> Attrs a -> Attrs a
 value i x = x { aValue = i }
 
 handler :: (a -> IO ()) -> Attrs a -> Attrs a
-handler i x = x { aHandlers = i:(aHandlers x) }
+handler i x = x { aHandlers = i : aHandlers x }
 
 data Elem =
     HBox [Elem]
@@ -336,12 +333,12 @@ drawElem (Rekt x y w h b@(Button Attrs{..})) = do
   when (state' == ActiveFocus) $ do
     modify (\x' -> x' { events = [b] })
 
-  let corners = case inHBox of
-        False -> pure True
-        True -> case (firstElem, lastElem) of
+  let corners = if inHBox then
+       (case  (firstElem, lastElem) of
           (True, _) -> (pure True) { topRight = False, downRight = False }
           (_, True) -> (pure True) { topLeft = False, downLeft = False }
           _         -> pure False
+       ) else pure False
 
   lift $ toolButton
     (V2 (fromIntegral x) (fromIntegral y))
@@ -365,14 +362,14 @@ orderTrackingMapM_ fn (a:xs) = do
   void $ fn a
   modify (\x -> x { firstElem = False })
   mapM_ fn (Data.List.init xs)
-  when (length xs >= 1) $ do
+  unless (null xs) $ do
     modify (\x -> x { lastElem = True })
     void $ fn $ last xs
     modify (\x -> x { lastElem = False })
 
 initWindow :: String -> Int -> Int -> IO GLFW.Window
 initWindow title width height = do
-    void $ GLFW.init
+    void GLFW.init
 
     GLFW.defaultWindowHints
 
@@ -392,5 +389,5 @@ initWindow title width height = do
       Nothing -> error "Can't createWindow"
       Just win -> do
         GLFW.makeContextCurrent $ Just win
-        void $ glewInit
+        void glewInit
         return win

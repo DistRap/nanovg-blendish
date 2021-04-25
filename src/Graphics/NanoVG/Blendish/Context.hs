@@ -16,10 +16,10 @@ data UIContext = UIContext {
 type Draw = ReaderT UIContext IO
 
 theme :: Draw Theme
-theme = ask >>= return . ctxTheme
+theme = ctxTheme <$> ask
 
 mouse :: Draw (Double, Double)
-mouse = ask >>= return . ctxMouse
+mouse = ctxMouse <$> ask
 
 withCtx :: (Context -> IO a) -> Draw a
 withCtx op = ask >>= liftIO . op . ctxNvg

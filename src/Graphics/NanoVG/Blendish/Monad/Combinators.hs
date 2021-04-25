@@ -1,4 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
 
 module Graphics.NanoVG.Blendish.Monad.Combinators where
 

@@ -239,7 +239,7 @@ nodeWireColor NoFocus     NodeTheme{..} = rgbf1 0.5
 clamp :: Ord a => a -> a -> a -> a
 clamp x low _    | x < low = low
 clamp x _   high | x > high = high
-clamp x _   _    | otherwise = x
+clamp x _   _    = x
 
 scrollHandleRect
   :: V2 Float
@@ -253,10 +253,10 @@ scrollHandleRect (V2 x y) (V2 w h) off' size' =
   in if h > w
     then
       let hs = max (size * h) (w + 1)
-      in (V4 x (y + (h - hs) * off) w hs)
+      in V4 x (y + (h - hs) * off) w hs
     else
       let ws = max (size * w) (h - 1)
-      in (V4 (x + (w - ws) * off) y ws h)
+      in V4 (x + (w - ws) * off) y ws h
 
 
 -- default label text size

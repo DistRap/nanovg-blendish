@@ -446,7 +446,7 @@ labelCarret (V2 x y) (V2 w _h) textColor' fontSize' txt caretStart caretEnd = do
       NanoVG.Internal.Text.text c (cvt x) (cvt textY)
         (NanoVG.Internal.Text.start row) (NanoVG.Internal.Text.end row)
 
--- | Get carret position based on cursor position
+-- | Draw carret position based on cursor position
 --
 -- Algorithm from https://github.com/cocreature/nanovg-hs/blob/master/example/Example.hs#L247
 caretP

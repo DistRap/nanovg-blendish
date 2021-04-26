@@ -53,14 +53,16 @@ foreign import ccall unsafe "initGlew"
   glewInit :: IO CInt
 
 data BlendishConfig = BlendishConfig {
-    configNanovgAntialias :: Bool
-  , configNanovgDebug :: Bool
+    configNanovgAntialias :: Bool -- ^ Use NanoVGs built-in anti-aliasing
+  , configNanovgDebug :: Bool -- ^ Enable NanoVG debug output
+  , configScaling :: Float -- ^ Zoom factor
   } deriving Show
 
 instance Default BlendishConfig where
   def = BlendishConfig {
           configNanovgAntialias = False
         , configNanovgDebug = False
+        , configScaling = 1
         }
 
 data UIData = UIData {
@@ -99,7 +101,7 @@ blendishCfg BlendishConfig{..} win drawAct = do
       Just x -> return x
 
     let renderAct = \drawData -> do
-          render nanovgContext (drawAct drawData) uiData win
+          render nanovgContext (drawAct drawData) uiData win configScaling
     return renderAct
 
 
@@ -109,15 +111,16 @@ render
   -> Draw ()
   -> UIData
   -> Window
+  -> Float
   -> IO ()
-render nanovgCtx drawAct uiData win = do
+render nanovgCtx drawAct uiData win zoom = do
 
   (winW, winH) <- GLFW.getWindowSize win
   (mx, my) <- GLFW.getCursorPos win
   (fbW, _fbH) <- GLFW.getFramebufferSize win
   let pxRatio = fromIntegral fbW / fromIntegral winW
 
-  NanoVG.beginFrame nanovgCtx (fromIntegral winW) (fromIntegral winH) (pxRatio * 1.0)
+  NanoVG.beginFrame nanovgCtx (fromIntegral winW / zoom) (fromIntegral winH / zoom) (pxRatio * zoom)
 
   runDraw
     (DrawContext

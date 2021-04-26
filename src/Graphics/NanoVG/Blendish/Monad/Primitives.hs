@@ -375,7 +375,7 @@ labelCarret (V2 x y) (V2 w _h) textColor' fontSize' txt caretStart caretEnd = do
     NanoVG.save c
     (_, CFloat desc, CFloat lineh) <- NanoVG.textMetrics c
 
-    -- what if textBreakLines function was a fold?
+    -- TODO what if textBreakLines function was a fold?
     NanoVG.textBreakLines c txt (cvt w) 3 $ \row i -> do
       let y' = y + fromIntegral i * lineh
           textY = y' + lineh

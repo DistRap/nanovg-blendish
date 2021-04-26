@@ -55,14 +55,12 @@ foreign import ccall unsafe "initGlew"
 data BlendishConfig = BlendishConfig {
     configNanovgAntialias :: Bool
   , configNanovgDebug :: Bool
-  , configFontSize :: Int
   } deriving Show
 
 instance Default BlendishConfig where
   def = BlendishConfig {
           configNanovgAntialias = False
         , configNanovgDebug = False
-        , configFontSize = 08
         }
 
 data UIData = UIData {
@@ -92,7 +90,6 @@ blendishCfg BlendishConfig{..} win drawAct = do
         ++ Data.Bool.bool [] (pure Antialias) configNanovgAntialias
         ++ Data.Bool.bool [] (pure Debug) configNanovgDebug
 
-    NanoVG.fontSize nanovgContext (fromIntegral configFontSize)
     NanoVG.fontFace nanovgContext "sans"
     NanoVG.globalAlpha nanovgContext 1
 

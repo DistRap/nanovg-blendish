@@ -7,7 +7,7 @@ module Graphics.NanoVG.Blendish (
     blendish
   , blendishCfg
   , BlendishConfig(..)
-  , main
+  , demoMain
   , simple
   , initWindow
   , loadData
@@ -132,8 +132,8 @@ render nanovgCtx drawAct uiData win zoom = do
   NanoVG.endFrame nanovgCtx
 
 -- | Demo rendering example
-main :: IO ()
-main = do
+demoMain :: IO ()
+demoMain = do
     win <- initWindow "nanovg-blendish" 1920 1080
 
     -- init blendish
